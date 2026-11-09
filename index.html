@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#172018">
 <title>WORKED — Backyard Brawl</title>
 <style>
-:root{font-family:Inter,system-ui,Arial,sans-serif;color:#f4f1e7}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172018;touch-action:none;user-select:none}#game{position:fixed;inset:0;overflow:hidden;background:#344d32}canvas{display:block;width:100%;height:100%}
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#f4f1e7}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172018;touch-action:none;user-select:none}#game{position:fixed;inset:0;overflow:hidden;background:#344d32}canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
 #hud{position:absolute;inset:0;pointer-events:none;padding:clamp(7px,1.5vw,17px);display:flex;flex-direction:column;justify-content:space-between}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.panel{background:#101711dc;border:1px solid #ffffff38;border-radius:10px;padding:7px 11px;min-width:clamp(90px,17vw,175px);backdrop-filter:blur(5px)}.name{font-size:clamp(9px,1.35vw,12px);letter-spacing:1.5px;color:#d1dfc2}.number{font-size:clamp(12px,1.7vw,17px);font-weight:900}.health{height:8px;background:#563e39;border-radius:10px;overflow:hidden;margin-top:4px}.health span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#9bd45e,#e5d96e)}.right .health span{margin-left:auto;background:linear-gradient(90deg,#eab45d,#d65a53)}.center{text-align:center;font-size:clamp(14px,2.8vw,24px);font-weight:1000;letter-spacing:3px;text-shadow:0 2px 8px #000}.sub{font-size:9px;letter-spacing:1px;color:#d1d8c8;font-weight:600}
 .bottom{display:flex;justify-content:space-between;align-items:end}.side{pointer-events:auto;display:flex;align-items:end}.joystick{width:clamp(100px,17vw,148px);height:clamp(100px,17vw,148px);position:relative;touch-action:none}.joy-base{position:absolute;inset:8%;border-radius:50%;border:2px solid #ffffff55;background:#101711a8;box-shadow:inset 0 0 22px #0008}.joy-base:before,.joy-base:after{content:"";position:absolute;background:#ffffff20}.joy-base:before{left:50%;top:8%;bottom:8%;width:1px}.joy-base:after{top:50%;left:8%;right:8%;height:1px}.joy-knob{position:absolute;width:42%;height:42%;left:29%;top:29%;border-radius:50%;border:2px solid #ffffffa0;background:radial-gradient(circle at 35% 30%,#829b76,#344d37 70%);box-shadow:0 4px 12px #0009;pointer-events:none}.joy-label{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:1px;color:#f4f1e7;background:#101711a8;padding:2px 7px;border-radius:8px}
 .attacks{display:grid;grid-template-columns:repeat(2,clamp(55px,8.5vw,78px));gap:7px;pointer-events:auto}.attack{width:clamp(55px,8.5vw,78px);height:clamp(55px,8.5vw,78px);border:2px solid #ffffff8a;background:#15221cdb;color:#fff;border-radius:50%;font-size:21px;font-weight:1000;box-shadow:0 4px 0 #0009;touch-action:none}.attack small{display:block;font-size:clamp(7px,1vw,9px);letter-spacing:.3px;font-weight:700}.attack:active,.attack.down{transform:translateY(3px);background:#c5dc91;color:#152018}.hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:9px;color:#e1e7d8;background:#101711a8;border-radius:9px;padding:5px 9px;white-space:nowrap;pointer-events:none}
@@ -19,7 +19,7 @@
 <div class="bottom"><div class="side"><div class="joystick" id="joystick"><div class="joy-base"></div><div class="joy-knob" id="knob"></div><div class="joy-label">MOVE</div></div></div><div class="attacks"><button class="attack" data-action="x">X<small>JAB / LOW KICK</small></button><button class="attack" data-action="o">O<small>JAB / HIGH KICK</small></button><button class="attack" data-action="triangle">△<small>HOOK / BODY</small></button><button class="attack" data-action="square">□<small>HOOK / HARD BODY</small></button></div></div>
 <div class="hint">LEFT JOYSTICK: MOVE • DOUBLE TAP X/O: KICK • DOUBLE TAP △/□: BODY SHOT</div></div>
 <div id="toast"></div>
-<div class="select" id="select"><h1>BACKYARD BRAWL</h1><p>Four stick fighters. One backyard. The fans are the barriers — stand by them too long and they'll blow you back toward the fight.</p><div class="fighters" id="fighters"></div><p>Choose your fighter, then fight the CPU.</p><button class="start" id="start">START FIGHT</button></div>
+<div class="select" id="select"><h1>BACKYARD BRAWL</h1><p>Choose a fighter and take on the backyard crowd. Get too close to the edge and spectators will shove you back into the fight.</p><div class="fighters" id="fighters"></div><p>Choose your fighter, then fight the CPU.</p><button class="start" id="start">START FIGHT</button></div>
 <div class="select hidden" id="result"><h1 id="resultTitle">KNOCKOUT</h1><p id="resultText"></p><button class="start" id="rematch">RUN IT BACK</button></div>
 <div class="rotate"><div><span>↻</span><b>TURN YOUR PHONE SIDEWAYS</b><p>WORKED is designed for landscape play.</p></div></div></div>
 <script>
@@ -29,7 +29,8 @@ const roster=[
 {name:'ACE',color:'#e9e3d5',accent:'#d6b35c',style:'BALANCED',speed:1,power:1},
 {name:'BRICK',color:'#d9d2c4',accent:'#c35b50',style:'POWER',speed:.82,power:1.28},
 {name:'QUICK',color:'#d3ded4',accent:'#5ca5a2',style:'SPEED',speed:1.28,power:.82},
-{name:'GHOST',color:'#d7d2e7',accent:'#927bc2',style:'COUNTER',speed:1.08,power:1.05}
+{name:'GHOST',color:'#d7d2e7',accent:'#927bc2',style:'COUNTER',speed:1.08,power:1.05},
+{name:'CALLEJERO',color:'#b98a56',accent:'#e9e5d8',style:'SOMBRA BLANCA',speed:1.06,power:1.12}
 ];
 let W=0,H=0,dpr=1,last=0,elapsed=0,playing=false,selected=0,enemyIndex=1,player,enemy,particles=[],joy={x:0,y:0,active:false,id:null},toastTimer=0;
 const $=id=>document.getElementById(id);
@@ -59,76 +60,105 @@ let mx=0,my=0;if(f.player){mx=joy.x;my=joy.y}else{const dx=op.x-f.x,dy=op.y-f.y;
 if(f.stun<=0&&f.fall<=0){f.vx+=mx*720*f.spec.speed*dt;f.vy+=my*330*dt;if(mx)f.face=Math.sign(mx)}else{f.vx*=.985;f.vy*=.985}
 f.vx*=Math.pow(.018,dt);f.vy*=Math.pow(.018,dt);f.vx=Math.max(-320,Math.min(320,f.vx));f.vy=Math.max(-130,Math.min(130,f.vy));f.x+=f.vx*dt;f.y+=f.vy*dt;
 const minX=W*.13,maxX=W*.87,minY=H*.52,maxY=H*.82;f.x=Math.max(minX,Math.min(maxX,f.x));f.y=Math.max(minY,Math.min(maxY,f.y));
-if(f.x<W*.19||f.x>W*.81){f.fanTimer+=dt;if(f.fanTimer>1.05){const dir=f.x<W*.19?1:-1;f.vx+=dir*185;f.x+=dir*23;f.fanTimer=0;if(f.player)toast('FAN PUSH!');burst(f.x,f.y-10,6,'#b9d6e8')}}else f.fanTimer=Math.max(0,f.fanTimer-dt*1.5);
+if(f.x<W*.17||f.x>W*.83){f.fanTimer+=dt;if(f.fanTimer>.62){const dir=f.x<W*.17?1:-1;f.vx+=dir*255;f.x+=dir*29;f.fanTimer=0;if(f.player)toast('THE CROWD SHOVES YOU BACK!');burst(f.x,f.y-13,10,'#e8d7b4')}}else f.fanTimer=Math.max(0,f.fanTimer-dt*1.8);
 f.fall=Math.max(0,f.fall-dt);if(f.fall===0&&f.stun===0){f.y+=(H*.70-f.y)*Math.min(1,dt*5)}
 }
 function line(x1,y1,x2,y2,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+
+// Pixel-art fighter renderer: flat side-on silhouettes, chunky outlines and hand-built animation poses.
 function drawStick(f){
-const x=f.x,y=f.y,face=f.face,walking=Math.min(1,Math.hypot(f.vx,f.vy)/170),step=elapsed*11+(f.player?0:1.7),move=Math.sin(step)*walking;
-const attack=f.attack>0?1:0,progress=attack?1-f.attack/.25:0,punch=attack?Math.sin(Math.min(1,progress)*Math.PI):0;
-const hurt=f.stun>0?Math.min(1,f.stun*3):0,down=f.fall>0?Math.min(1,f.fall*3):0;
-const depth=.78+Math.max(0,Math.min(1,(y-H*.52)/(H*.30)))*.28,col=f.flash>0?'#fff':f.spec.color,accent=f.spec.accent;
-ctx.save();ctx.translate(x,y);ctx.scale(face*depth,depth);ctx.rotate((hurt*.28+down*.92)*(face===1?1:-1));
-ctx.fillStyle='#0006';ctx.beginPath();ctx.ellipse(0,7,25,6,0,0,Math.PI*2);ctx.fill();
-const bob=Math.sin(elapsed*8+(f.player?0:1))*1.7*(1-walking),hip={x:0,y:-27+bob};
-const segment=(a,b,w)=>line(a.x,a.y,b.x,b.y,col,w),joint=(p,r=4)=>{ctx.fillStyle=col;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill()};
-let la={el:{x:-20,y:-51},hand:{x:-24,y:-34}},ra={el:{x:20,y:-51},hand:{x:25,y:-34}};
-let ll={knee:{x:-14+move*5,y:-2},foot:{x:-19+move*11,y:27+Math.max(0,-move)*5}},rl={knee:{x:14-move*5,y:-1},foot:{x:20-move*11,y:28+Math.max(0,move)*5}},lean=0;
-if(attack){
- if(f.attackType==='jab'){ra={el:{x:31+18*punch,y:-57},hand:{x:52+22*punch,y:-69}};lean=-.10*punch}
- if(f.attackType==='leftHook'){la={el:{x:27+10*punch,y:-76},hand:{x:43+12*punch,y:-49}};lean=-.22*punch}
- if(f.attackType==='rightHook'){ra={el:{x:31+12*punch,y:-77},hand:{x:46+13*punch,y:-49}};lean=-.25*punch}
- if(f.attackType==='body'||f.attackType==='hardBody'){ra={el:{x:25+12*punch,y:-45},hand:{x:48+17*punch,y:-30}};la={el:{x:12,y:-52},hand:{x:27,y:-40}};lean=-.24*punch}
- if(f.attackType==='lowKick'){rl={knee:{x:28,y:-1},foot:{x:58+17*punch,y:4}};la={el:{x:-17,y:-42},hand:{x:-28,y:-30}};ra={el:{x:18,y:-42},hand:{x:31,y:-32}};lean=-.15*punch}
- if(f.attackType==='highKick'){rl={knee:{x:30,y:-24},foot:{x:61+18*punch,y:-57}};la={el:{x:-16,y:-45},hand:{x:-28,y:-34}};ra={el:{x:17,y:-43},hand:{x:29,y:-33}};lean=-.28*punch}
+ const x=f.x,y=f.y,face=f.face,walk=Math.min(1,Math.hypot(f.vx,f.vy)/150),phase=elapsed*10+(f.player?0:1.4);
+ const attacking=f.attack>0,progress=attacking?1-f.attack/.25:0,punch=attacking?Math.sin(Math.min(1,progress)*Math.PI):0;
+ const hurt=f.stun>0,down=f.fall>0,calle=f.index===4;
+ const shirt=calle?'#b98a56':f.spec.accent, pants=calle?'#66717b':'#333d45',mask='#eee9dc',outline='#282725';
+ const bob=Math.round(Math.sin(phase)*2*(1-walk)),step=Math.round(Math.sin(phase)*4*walk);
+ ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(face,1);
+ // Ground shadow and squash/lean for hit reactions.
+ ctx.fillStyle='#161b17a8';ctx.fillRect(-19,2,40,5);
+ if(down)ctx.rotate(.72);
+ const px=(a,b,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(a),Math.round(b),w,h)};
+ // Shoes, legs and jeans: separate frames for idle, run, crouch and kicks.
+ let legA=step,legB=-step;
+ if(attacking&&f.attackType.toLowerCase().includes('kick')){legA=20+Math.round(24*punch);legB=-8}
+ if(down){legA=12;legB=-8}
+ px(-13+legA,-20+bob,10,17,pants);px(-14+legA,-7+bob,12,8,pants);
+ px(3+legB,-20+bob,10,17,pants);px(2+legB,-7+bob,12,8,pants);
+ px(-18+legA,-1+bob,18,5,'#d9d8d0');px(-2+legB,-1+bob,18,5,'#d9d8d0');
+ px(-15+legA,-17+bob,13,3,'#87919a');px(2+legB,-17+bob,12,3,'#87919a');
+ // Torso and belt.
+ px(-13,-54+bob,27,29,outline);px(-11,-53+bob,23,27,shirt);
+ px(-13,-29+bob,27,5,outline);px(-11,-28+bob,23,3,calle?'#e7e3d7':'#d4d0c4');
+ px(-2,-29+bob,6,4,'#d6cba8');px(0,-28+bob,2,2,'#544c3d');
+ // Arms are animated independently for jab, hook, body shot, guard and recovery.
+ let backEl=[-17,-43],backHand=[-20,-32],frontEl=[17,-44],frontHand=[20,-32];
+ if(attacking){
+  const t=f.attackType;
+  if(t==='jab'){frontEl=[24+Math.round(10*punch),-49];frontHand=[43+Math.round(20*punch),-49]}
+  else if(t==='leftHook'){backEl=[-2,-62];backHand=[20+Math.round(20*punch),-52];frontEl=[17,-43];frontHand=[23,-32]}
+  else if(t==='rightHook'){frontEl=[25,-61];frontHand=[39+Math.round(12*punch),-49]}
+  else if(t==='body'||t==='hardBody'){frontEl=[22,-42];frontHand=[42+Math.round(15*punch),-34];backEl=[-5,-48];backHand=[10,-38]}
+  else if(t==='lowKick'||t==='highKick'){frontEl=[20,-49];frontHand=[27,-40];backEl=[-18,-48];backHand=[-25,-39]}
+ }
+ if(hurt){backEl=[-23,-46];backHand=[-28,-36];frontEl=[23,-46];frontHand=[29,-36]}
+ if(!attacking&&!hurt){backEl=[-18,-44+Math.round(step*.35)];backHand=[-20,-31+Math.round(step*.3)];frontEl=[18,-44-Math.round(step*.35)];frontHand=[21,-31-Math.round(step*.3)]}
+ const limb=(sx,sy,ex,ey,c)=>{px(sx-3,sy,7,Math.max(4,ey-sy),outline);px(sx-2,sy,5,Math.max(4,ey-sy),c);px(ex-3,ey-2,8,7,outline);px(ex-2,ey-1,6,5,mask)};
+ limb(-9,-51,backEl[0],backEl[1],shirt);limb(9,-51,frontEl[0],frontEl[1],shirt);
+ px(backHand[0]-4,backHand[1]-3,9,8,outline);px(backHand[0]-2,backHand[1]-2,6,5,mask);
+ px(frontHand[0]-4,frontHand[1]-3,9,8,outline);px(frontHand[0]-2,frontHand[1]-2,6,5,mask);
+ // Neck, head wrap, white face covering and scarf reproduce the supplied Callejero design.
+ px(-7,-67+bob,15,15,outline);px(-5,-66+bob,11,12,calle?'#b58a62':'#b98d6a');
+ px(-9,-78+bob,19,17,outline);px(-7,-77+bob,15,14,calle?mask:f.spec.color);
+ px(-8,-73+bob,17,7,mask);px(-7,-67+bob,15,7,mask);px(-5,-63+bob,11,5,mask);
+ px(-8,-76+bob,18,3,calle?'#fffdf2':f.spec.color);px(-10,-72+bob,3,7,outline);px(8,-72+bob,3,7,outline);
+ // Scarf drapes over the chest, especially visible on Callejero.
+ px(-8,-60+bob,17,8,mask);px(-6,-54+bob,13,7,mask);px(-4,-48+bob,9,5,mask);
+ if(calle){px(-12,-28+bob,5,3,'#f3f0e7');px(8,-28+bob,5,3,'#f3f0e7')}
+ // Motion trails and impact accents are pixel blocks rather than smooth 3D arcs.
+ if(attacking&&punch>.08){ctx.globalAlpha=.75;const hx=frontHand[0]+8;px(hx,-52,3,3,'#fff1c8');px(hx+6,-56,3,3,'#fff1c8');px(hx+10,-48,3,3,'#fff1c8');ctx.globalAlpha=1}
+ if(hurt){px(-18,-87,4,4,'#fff4b8');px(16,-84,4,4,'#fff4b8')}
+ ctx.restore();
+ ctx.textAlign='center';ctx.font='bold 10px monospace';ctx.fillStyle='#fff';ctx.fillText(f.spec.name,Math.round(x),Math.round(y-94));
 }
-if(!attack&&walking){ll.knee.y+=Math.max(0,move)*8;ll.foot.y+=Math.max(0,-move)*9;rl.knee.y+=Math.max(0,-move)*8;rl.foot.y+=Math.max(0,move)*9}
-if(hurt){la={el:{x:-28,y:-47},hand:{x:-37,y:-35}};ra={el:{x:25,y:-48},hand:{x:35,y:-34}}}
-if(down){ll.knee.y+=down*18;rl.knee.y+=down*18;ll.foot.y+=down*22;rl.foot.y+=down*22}
-ctx.rotate(lean+hurt*.12);
-segment({x:-2,y:-64+bob},hip,9);segment(hip,ll.knee,7);segment(ll.knee,ll.foot,6);segment(hip,rl.knee,7);segment(rl.knee,rl.foot,6);
-line(ll.foot.x,ll.foot.y,ll.foot.x+12,ll.foot.y+2,col,5);line(rl.foot.x,rl.foot.y,rl.foot.x+12,rl.foot.y+2,col,5);
-segment({x:-2,y:-62+bob},la.el,7);segment(la.el,la.hand,6);segment({x:2,y:-62+bob},ra.el,7);segment(ra.el,ra.hand,6);
-joint(la.el);joint(ra.el);joint(la.hand);joint(ra.hand);
-ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,-85+bob,10,12,0,0,Math.PI*2);ctx.fill();
-ctx.fillStyle=accent;ctx.fillRect(-9,-68+bob,18,5);ctx.beginPath();ctx.arc(4,-87+bob,2.5,0,Math.PI*2);ctx.fill();
-if(attack){ctx.globalAlpha=.65;ctx.strokeStyle=accent;ctx.lineWidth=3;ctx.beginPath();if(f.attackType.includes('Kick'))ctx.arc(34,-38,29,-.9,.5);else ctx.arc(27,-57,22,-1.05,.45);ctx.stroke();ctx.globalAlpha=1}
-if(hurt){ctx.strokeStyle='#fff6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-87,17,Math.PI,Math.PI*1.8);ctx.stroke()}
-ctx.restore();ctx.textAlign='center';ctx.font='bold '+Math.max(8,10*depth)+'px system-ui';ctx.fillStyle='#fff';ctx.fillText(f.spec.name,x,y-108*depth);
+function spectator(x,y,scale,variant,cheering=false){
+ const shirts=['#b8c9d2','#d5b38b','#a8b89a','#c5a5a5','#d2d0bd','#8298b4'];ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(scale,scale);
+ const skin=['#d6a77d','#a96f4c','#edc39b'][variant%3],shirt=shirts[variant%shirts.length];
+ ctx.fillStyle='#171a17';ctx.fillRect(-8,0,17,4);ctx.fillStyle=shirt;ctx.fillRect(-7,-17,14,17);ctx.fillStyle=skin;ctx.fillRect(-5,-26,10,10);ctx.fillStyle=['#30251f','#4b3024','#171b1a'][variant%3];ctx.fillRect(-6,-29,12,4);
+ ctx.fillStyle=shirt;ctx.fillRect(-11,cheering?-31:-14,5,cheering?17:8);ctx.fillRect(6,cheering?-32:-14,5,cheering?18:8);
+ ctx.fillStyle=skin;ctx.fillRect(-12,cheering?-34:-7,5,5);ctx.fillRect(7,cheering?-35:-7,5,5);
+ if(variant%4===0){ctx.fillStyle='#e7d9b7';ctx.fillRect(-10,-40,20,3);ctx.fillRect(-8,-43,16,3)}
+ ctx.restore();
 }
-function fan(x,y){ctx.save();ctx.translate(x,y);ctx.fillStyle='#171d19';ctx.fillRect(-22,-23,44,8);ctx.fillRect(-4,-15,8,27);ctx.fillStyle='#b9c4ba';ctx.beginPath();ctx.arc(0,-29,23,0,Math.PI*2);ctx.fill();for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2+elapsed*3);ctx.fillStyle='#65776b';ctx.beginPath();ctx.ellipse(0,-15,6,14,0,0,Math.PI*2);ctx.fill();ctx.restore()}ctx.strokeStyle='#35483b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-29,23,0,Math.PI*2);ctx.stroke();ctx.restore()}
-function spectator(x,y,scale,variant){
-const shirts=['#b8c9d2','#d5b38b','#a8b89a','#c5a5a5','#d2d0bd','#8298b4'];ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
-ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(0,2,10,3,0,0,Math.PI*2);ctx.fill();
-ctx.fillStyle=shirts[variant%shirts.length];ctx.beginPath();ctx.roundRect(-7,-17,14,18,4);ctx.fill();
-ctx.fillStyle=['#4b3024','#30251f','#d0a36e','#e0c29a'][variant%4];ctx.beginPath();ctx.arc(0,-23,6,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle=shirts[variant%shirts.length];ctx.lineWidth=4;ctx.lineCap='round';const cheer=variant%3===0;
-ctx.beginPath();ctx.moveTo(-5,-13);ctx.lineTo(cheer?-12:-11,cheer?-29:-7);ctx.moveTo(5,-13);ctx.lineTo(cheer?12:11,cheer?-30:-7);ctx.stroke();ctx.restore();
+function crowd(){
+ let n=0;
+ // Packed rows behind the ring, with varied shirts, skin tones, raised arms and signs.
+ for(let x=18;x<W-12;x+=Math.max(17,W*.026)){spectator(x,H*.385,.82+(n%3)*.08,n,n%3===0);n++}
+ // Side crowds lean into the ring; these are the active push zones.
+ for(let y=H*.49;y<H*.84;y+=Math.max(22,H*.055)){spectator(W*.075,y,.95+(n%2)*.1,n,true);spectator(W*.925,y,.95+(n%2)*.1,n+1,true);n+=2}
+ for(let x=12;x<W-12;x+=Math.max(20,W*.03)){spectator(x,H*.90,1.02+(n%3)*.06,n,n%2===0);n++}
+ // Crowd barrier rails and a few hand-painted signs.
+ ctx.strokeStyle='#332c24';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(W*.11,H*.48);ctx.lineTo(W*.89,H*.48);ctx.moveTo(W*.11,H*.48);ctx.lineTo(W*.11,H*.86);ctx.moveTo(W*.89,H*.48);ctx.lineTo(W*.89,H*.86);ctx.stroke();
+ ctx.fillStyle='#e8d9b5';ctx.fillRect(W*.16,H*.405,64,18);ctx.fillRect(W*.72,H*.405,72,18);
+ ctx.fillStyle='#392f25';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('GO!',W*.16+32,H*.418);ctx.fillText('FIGHT!',W*.72+36,H*.418);
 }
-function crowd(){let n=0;for(let x=W*.13;x<W*.88;x+=Math.max(22,W*.035))spectator(x,H*.445,.72+(n%3)*.08,n++);for(let y=H*.53;y<H*.85;y+=Math.max(28,H*.075)){spectator(W*.105,y,.78+(n%2)*.12,n++);spectator(W*.895,y,.78+(n%2)*.12,n++)}for(let x=W*.16;x<W*.85;x+=Math.max(28,W*.045))spectator(x,H*.895,.88+(n%3)*.08,n++)}
-function referee(){
-ctx.save();ctx.translate(W*.5,H*.91);ctx.fillStyle='#111a18';ctx.beginPath();ctx.ellipse(0,0,34,13,0,0,Math.PI*2);ctx.fill();
-ctx.fillStyle='#202a28';ctx.beginPath();ctx.moveTo(-28,3);ctx.lineTo(-23,-28);ctx.quadraticCurveTo(0,-43,23,-28);ctx.lineTo(29,4);ctx.closePath();ctx.fill();
-ctx.save();ctx.beginPath();ctx.moveTo(-23,-28);ctx.quadraticCurveTo(0,-43,23,-28);ctx.lineTo(29,4);ctx.lineTo(-28,4);ctx.closePath();ctx.clip();
-for(let y=-38;y<8;y+=11){ctx.strokeStyle='#e8e5d8';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-32,y);ctx.lineTo(32,y+5);ctx.stroke()}ctx.restore();
-ctx.fillStyle='#a97855';ctx.beginPath();ctx.arc(0,-45,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#171c1b';ctx.beginPath();ctx.arc(0,-50,13,Math.PI,Math.PI*2);ctx.fill();ctx.restore();
-}
+function referee(){ctx.save();ctx.translate(W*.5,H*.94);ctx.fillStyle='#202a28';ctx.fillRect(-30,-14,60,18);ctx.fillStyle='#eee9dc';for(let i=0;i<5;i++)ctx.fillRect(-28+i*12,-12,6,14);ctx.fillStyle='#a97855';ctx.fillRect(-10,-34,20,20);ctx.fillStyle='#171c1b';ctx.fillRect(-12,-37,24,6);ctx.restore()}
 function draw(){
-ctx.clearRect(0,0,W,H);let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#7f9a72');g.addColorStop(.48,'#526f49');g.addColorStop(1,'#1d3023');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-ctx.fillStyle='#b9ac83';ctx.fillRect(0,H*.31,W,H*.16);ctx.fillStyle='#74694f';for(let x=0;x<W;x+=42){ctx.fillRect(x,H*.30,5,H*.18);ctx.fillRect(x,H*.36,42,4)}
-ctx.fillStyle='#31472f';for(let x=0;x<W;x+=65){ctx.beginPath();ctx.arc(x+20,H*.35,40,0,Math.PI*2);ctx.fill()}
-// Referee-height over-the-shoulder view; the ring widens toward the camera.
-ctx.fillStyle='#4a6046';ctx.beginPath();ctx.moveTo(W*.22,H*.48);ctx.lineTo(W*.78,H*.48);ctx.lineTo(W*.94,H*.88);ctx.lineTo(W*.06,H*.88);ctx.closePath();ctx.fill();
-ctx.fillStyle='#7f856e';ctx.beginPath();ctx.moveTo(W*.235,H*.50);ctx.lineTo(W*.765,H*.50);ctx.lineTo(W*.91,H*.85);ctx.lineTo(W*.09,H*.85);ctx.closePath();ctx.fill();
-ctx.strokeStyle='#d0c6a4';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*.235,H*.50);ctx.lineTo(W*.765,H*.50);ctx.lineTo(W*.91,H*.85);ctx.lineTo(W*.09,H*.85);ctx.closePath();ctx.stroke();
-for(let k=0;k<3;k++){const yy=H*(.56+k*.115),spread=.58+k*.14;ctx.strokeStyle=k===1?'#d6d0b8':'#aaa88f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W*(.5-spread/2),yy);ctx.lineTo(W*(.5+spread/2),yy);ctx.stroke()}
-ctx.strokeStyle='#b6b39a';ctx.lineWidth=2;for(let x of [.235,.765]){ctx.beginPath();ctx.moveTo(W*x,H*.50);ctx.lineTo(W*(x<.5?.09:.91),H*.85);ctx.stroke()}
-crowd();
-// Same fan barriers; the existing fanTimer pushback logic is untouched.
-fan(W*.13,H*.74);fan(W*.87,H*.74);ctx.fillStyle='#e6ddbd';ctx.textAlign='center';ctx.font='bold 12px system-ui';ctx.fillText('WORKED • BACKYARD FIGHT CLUB',W/2,H*.265);
-ctx.fillStyle='#3b4939';ctx.fillRect(W*.035,H*.62,W*.07,8);ctx.fillRect(W*.035,H*.62,7,42);ctx.fillRect(W*.105,H*.62,7,42);
-if(player&&enemy){drawStick(player);drawStick(enemy)}
-for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.x+=p.vx/60;p.y+=p.vy/60;p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life/.36);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;if(p.life<=0)particles.splice(i,1)}referee();
+ ctx.clearRect(0,0,W,H);
+ // Flat 2D backyard pixel-art environment: no perspective camera or 3D arena.
+ ctx.fillStyle='#6e8a58';ctx.fillRect(0,0,W,H*.42);ctx.fillStyle='#8a9a68';ctx.fillRect(0,H*.42,W,H*.58);
+ // Brick wall, fences, yard details and trees.
+ ctx.fillStyle='#80694f';ctx.fillRect(0,H*.22,W,H*.22);ctx.fillStyle='#a48a67';for(let yy=H*.23;yy<H*.43;yy+=14){ctx.fillRect(0,yy,W,2);for(let xx=(Math.floor(yy/14)%2)*20;xx<W;xx+=48)ctx.fillRect(xx,yy,2,14)}
+ ctx.fillStyle='#334d32';for(let xx=0;xx<W;xx+=80){ctx.fillRect(xx+8,H*.12,7,H*.18);ctx.fillRect(xx-4,H*.11,34,18);ctx.fillRect(xx+1,H*.07,25,16)}
+ // Flat fight surface with painted scuffs, chalk boundary and crowd barrier.
+ ctx.fillStyle='#b5a17b';ctx.fillRect(W*.105,H*.455,W*.79,H*.43);ctx.fillStyle='#c8b58e';ctx.fillRect(W*.12,H*.47,W*.76,H*.40);
+ ctx.strokeStyle='#5c4a35';ctx.lineWidth=4;ctx.strokeRect(W*.12,H*.47,W*.76,H*.40);
+ ctx.strokeStyle='#e8dec3';ctx.lineWidth=2;ctx.setLineDash([8,7]);ctx.strokeRect(W*.15,H*.50,W*.70,H*.34);ctx.setLineDash([]);
+ // Dusty ground flecks and footprints.
+ for(let i=0;i<38;i++){const xx=(i*97%Math.max(1,W*.72))+W*.14,yy=(i*43%Math.max(1,H*.34))+H*.50;ctx.fillStyle=i%2?'#99876a':'#d8c49b';ctx.fillRect(xx,yy,3,2)}
+ ctx.fillStyle='#3c3026';ctx.font='bold '+Math.max(11,W*.018)+'px monospace';ctx.textAlign='center';ctx.fillText('WORKED • BACKYARD FIGHT CLUB',W/2,H*.30);
+ crowd();
+ if(player&&enemy){drawStick(player);drawStick(enemy)}
+ for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.x+=p.vx/60;p.y+=p.vy/60;p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life/.36);ctx.fillStyle=p.color;ctx.fillRect(Math.round(p.x),Math.round(p.y),4,4);ctx.globalAlpha=1;if(p.life<=0)particles.splice(i,1)}
+ referee();
 }
 function finish(){playing=false;const won=enemy.hp<=0;$('resultTitle').textContent=won?'YOU WIN!':'KNOCKED OUT';$('resultText').textContent=won?roster[selected].name+' owns the backyard. Run it back?':roster[enemyIndex].name+' got the win. Try another round?';$('result').classList.remove('hidden')}
 function frame(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;elapsed+=dt;if(playing){stepFighter(player,dt,enemy);stepFighter(enemy,dt,player);if(player.hp<=0||enemy.hp<=0)finish()}draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
