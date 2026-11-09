@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>WORKED — Backyard Brawl</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,Arial,sans-serif}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101510;color:#f6f3e8;touch-action:none}#game{position:fixed;inset:0;background:#263b27}canvas{display:block;width:100%;height:100%}#hud{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(8px,2vw,22px)}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.panel{background:#101511d9;border:1px solid #ffffff35;border-radius:12px;padding:9px 13px;backdrop-filter:blur(5px);min-width:120px}.name{font-size:12px;letter-spacing:2px;color:#c5d8b2}.health{height:10px;background:#523d3b;border-radius:20px;overflow:hidden;margin-top:6px}.health span{height:100%;display:block;background:linear-gradient(90deg,#9edc62,#e3db6c);width:100%;transition:width .15s}.right .health span{margin-left:auto;background:linear-gradient(90deg,#f0ae54,#dc6262)}.center{text-align:center;font-weight:900;letter-spacing:3px;font-size:clamp(15px,3vw,26px);text-shadow:0 2px 8px #000}.sub{font-size:10px;letter-spacing:1px;color:#c1c5b7;font-weight:500}.bottom{display:flex;justify-content:space-between;align-items:end;gap:12px}.hint{background:#101511d9;border-radius:10px;padding:8px 11px;font-size:11px;color:#d7ddcb;max-width:38%}.controls{display:flex;gap:8px;align-items:end;pointer-events:auto}.pad{display:grid;grid-template-columns:repeat(2,clamp(48px,8vw,78px));gap:7px}.ctrl{width:clamp(48px,8vw,78px);height:clamp(48px,8vw,78px);border:2px solid #ffffff65;background:#18251edb;color:white;border-radius:50%;font-size:20px;font-weight:900;box-shadow:0 4px 0 #0008;touch-action:none;user-select:none}.ctrl:active,.ctrl.down{transform:translateY(3px);background:#c0d78a;color:#182019}.ctrl small{display:block;font-size:9px;letter-spacing:.5px;font-weight:600}.leftpad{display:flex;gap:6px;pointer-events:auto}.move{border-radius:12px;width:clamp(48px,7vw,66px);height:clamp(46px,6vw,58px);font-size:19px}.select{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#101711ee;border:1px solid #ffffff44;border-radius:18px;padding:22px;max-width:min(92vw,500px);width:90%;text-align:center;pointer-events:auto;box-shadow:0 20px 80px #000a}.select h1{letter-spacing:5px;margin:0;font-size:clamp(25px,6vw,42px)}.select p{color:#c8d2be;font-size:13px;line-height:1.5}.fighters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:17px 0}.fighter{background:#29392b;border:1px solid #ffffff30;border-radius:12px;padding:8px 3px;color:white;font-size:11px}.fighter b{display:block;font-size:12px;margin-top:5px}.swatch{width:34px;height:34px;border-radius:50%;margin:auto;border:3px solid #eee}.start{border:0;border-radius:10px;padding:12px 27px;background:#c8e18f;color:#172017;font-weight:900;letter-spacing:2px;font-size:13px}.hidden{display:none!important}#toast{position:absolute;top:23%;left:50%;transform:translateX(-50%);background:#101711de;padding:8px 13px;border-radius:20px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none}.rotate{position:absolute;inset:0;display:none;background:#111;color:white;align-items:center;justify-content:center;text-align:center;padding:30px;z-index:9}
+@media(orientation:portrait){.rotate{display:flex}}
+</style></head><body><div id="game"><canvas id="scene"></canvas><div id="hud">
+<div class="top"><div class="panel"><div class="name" id="pname">PLAYER 1</div><b id="phealth">100</b><div class="health"><span id="pbar"></span></div></div><div class="center">WORKED<div class="sub" id="round">BACKYARD BRAWL • ROUND 1</div></div><div class="panel right"><div class="name" id="ename">OPPONENT</div><b id="ehealth">100</b><div class="health"><span id="ebar"></span></div></div></div>
+<div class="bottom"><div class="hint">MOVE: ◀ ▶<br>Tap attack once = punch<br>Tap twice = kick / body shot</div><div class="controls"><div class="leftpad"><button class="ctrl move" data-move="left">◀</button><button class="ctrl move" data-move="right">▶</button></div><div class="pad"><button class="ctrl" data-action="x">X<small>JAB / LOW KICK</small></button><button class="ctrl" data-action="o">O<small>JAB / HIGH KICK</small></button><button class="ctrl" data-action="triangle">△<small>HOOK / BODY</small></button><button class="ctrl" data-action="square">□<small>HOOK / BODY</small></button></div></div></div>
+</div><div id="toast"></div>
+<div class="select" id="select"><h1>BACKYARD BRAWL</h1><p>Four fighters. One backyard. Stay off the fans or get pushed back into the fight.</p><div class="fighters" id="fighters"></div><p>Choose your fighter, then take on the CPU.</p><button class="start" id="start">START FIGHT</button></div>
+<div class="select hidden" id="result"><h1 id="resultTitle">KNOCKOUT</h1><p id="resultText"></p><button class="start" id="rematch">RUN IT BACK</button></div>
+<div class="rotate">↻<br><br><b>ROTATE YOUR DEVICE</b><br><br>WORKED is designed to be played sideways in landscape mode.</div>
+</div>
+<script>
+(()=>{
+const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+const roster=[
+{name:'ACE',color:'#e8e2d2',accent:'#d7b35c',style:'Balanced',speed:1,power:1},
+{name:'BRICK',color:'#d9d2c4',accent:'#bf5750',style:'Power',speed:.82,power:1.28},
+{name:'QUICK',color:'#d3ded4',accent:'#5ca5a2',style:'Speed',speed:1.28,power:.82},
+{name:'GHOST',color:'#d7d2e7',accent:'#927bc2',style:'Counter',speed:1.08,power:1.05}
+];
+let W=0,H=0,dpr=1,last=0,elapsed=0,playing=false,selected=0,enemyIndex=1,player,enemy,particles=[],keys={},fanPush=0,toastTimer=0;
+const $=id=>document.getElementById(id);
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',resize);resize();
+function makeFighter(x,index,playerSide){const spec=roster[index];return{x,y:H*.69,vx:0,vy:0,hp:100,max:100,face:playerSide?1:-1,index,spec,player:playerSide,attack:0,attackType:'jab',cool:0,stun:0,guard:0,flash:0,air:0,fanTimer:0,combo:0,comboTime:0}}
+function rosterUI(){$('fighters').innerHTML=roster.map((r,i)=>'<button class="fighter" data-fighter="'+i+'"><div class="swatch" style="background:'+r.color+';box-shadow:inset 0 0 0 8px '+r.accent+'"></div><b>'+r.name+'</b>'+r.style+'</button>').join('');document.querySelectorAll('[data-fighter]').forEach(b=>b.onclick=()=>{selected=+b.dataset.fighter;document.querySelectorAll('[data-fighter]').forEach((el,i)=>el.style.outline=i===selected?'2px solid #c8e18f':'none')})}
+rosterUI();
+function begin(){enemyIndex=(selected+1+Math.floor(Math.random()*3))%4;player=makeFighter(W*.34,selected,true);enemy=makeFighter(W*.66,enemyIndex,false);player.y=enemy.y=H*.72;particles=[];elapsed=0;fanPush=0;playing=true;$('select').classList.add('hidden');$('result').classList.add('hidden');$('pname').textContent=roster[selected].name;$('ename').textContent=roster[enemyIndex].name;$('round').textContent='BACKYARD BRAWL • ROUND 1';updateHud();toast('FIGHT!')}
+$('start').onclick=begin;$('rematch').onclick=begin;
+function toast(s){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,1000)}
+function updateHud(){$('phealth').textContent=Math.ceil(player.hp);$('ehealth').textContent=Math.ceil(enemy.hp);$('pbar').style.width=player.hp+'%';$('ebar').style.width=enemy.hp+'%'}
+function attack(f,type){if(!playing||f.cool>0||f.stun>0)return;f.attack=.26;f.attackType=type;f.cool=.35;f.comboTime=.6;f.combo++;const opponent=f.player?enemy:player;const dist=Math.abs(opponent.x-f.x);let reach=type.includes('kick')?105:85;if(dist<reach){let damage=(type==='hardBody'?15:type==='body'?11:type==='hook'?12:type.includes('kick')?10:7)*f.spec.power; if(opponent.guard>0)damage*=.35;opponent.hp=Math.max(0,opponent.hp-damage);opponent.stun=.15+(damage/100);opponent.vx+=f.face*(type.includes('kick')?220:150);opponent.vy-=type.includes('kick')?90:35;opponent.flash=.13;burst(opponent.x,opponent.y-55,7,f.spec.accent);updateHud();if(type==='hardBody')toast('BODY SHOT!');else if(type.includes('kick'))toast('KICK!');}
+}
+function handleAction(action){if(!playing)return;const f=player,now=performance.now();f.tapTimes??={};const prev=f.tapTimes[action]||0;f.tapTimes[action]=now;const twice=now-prev<340;let type;if(action==='x')type=twice?'lowKick':'jab';if(action==='o')type=twice?'highKick':'jab';if(action==='triangle')type=twice?'body':'hook';if(action==='square')type=twice?'hardBody':'hook';attack(f,type)}
+function burst(x,y,n,color){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*220,vy:(Math.random()-.7)*180,life:.35,color})}
+document.querySelectorAll('[data-action]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');handleAction(b.dataset.action)});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>b.classList.remove('down')))});
+document.querySelectorAll('[data-move]').forEach(b=>{const m=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[m]=true;b.classList.add('down')});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>{keys[m]=false;b.classList.remove('down')}))});
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','a','d',' '].includes(e.key))e.preventDefault();keys[e.key==='ArrowLeft'||e.key==='a'?'left':e.key==='ArrowRight'||e.key==='d'?'right':e.key]=true;if(e.repeat)return;if(e.key.toLowerCase()==='j')handleAction('x');if(e.key.toLowerCase()==='k')handleAction('o');if(e.key.toLowerCase()==='u')handleAction('triangle');if(e.key.toLowerCase()==='i')handleAction('square')});
+addEventListener('keyup',e=>{keys[e.key==='ArrowLeft'||e.key==='a'?'left':e.key==='ArrowRight'||e.key==='d'?'right':e.key]=false});
+function stepFighter(f,dt,op){f.cool=Math.max(0,f.cool-dt);f.attack=Math.max(0,f.attack-dt);f.stun=Math.max(0,f.stun-dt);f.flash=Math.max(0,f.flash-dt);f.comboTime=Math.max(0,f.comboTime-dt);if(f.comboTime===0)f.combo=0;
+let move=0;if(f.player){move=(keys.right?1:0)-(keys.left?1:0)}else{const d=op.x-f.x;if(Math.abs(d)>77)move=Math.sign(d);if(Math.abs(d)<68&&Math.random()<dt*1.6)attack(f,['jab','hook','lowKick'][Math.floor(Math.random()*3)]);}
+if(f.stun<=0){f.vx+=move*650*f.spec.speed*dt;if(move)f.face=Math.sign(move);else f.vx*=Math.pow(.0008,dt);if(Math.abs(op.x-f.x)<65&&f.attack===0)f.vx*=.85}else f.vx*=.97;
+f.vx=Math.max(-270,Math.min(270,f.vx));f.x+=f.vx*dt;const margin=62;f.x=Math.max(margin,Math.min(W-margin,f.x));f.y=H*.72+Math.sin(elapsed*5+(f.player?0:1))*(Math.abs(f.vx)>20?2:0);
+const fanLeft=W*.17,fanRight=W*.83;if(f.x<fanLeft||f.x>fanRight){f.fanTimer+=dt;if(f.fanTimer>1.05){const direction=f.x<fanLeft?1:-1;f.vx+=direction*220;f.x+=direction*28;f.fanTimer=0;if(f.player)toast('FAN PUSH!');burst(f.x,f.y-12,5,'#b5d6ed')}}else f.fanTimer=Math.max(0,f.fanTimer-dt*1.5);
+}
+function drawStick(f){const x=f.x,y=f.y,face=f.face,scale=1;const armSwing=f.attack>0?1:0;ctx.save();ctx.translate(x,y);ctx.scale(face,1);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=f.flash>0?'#ffffff':f.spec.color;ctx.fillStyle=f.spec.color;ctx.lineWidth=7;
+ctx.beginPath();ctx.ellipse(0,4,19,5,0,0,Math.PI*2);ctx.fillStyle='#0005';ctx.fill();
+ctx.strokeStyle='#171817';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(-7,-5);ctx.lineTo(-10,22);ctx.moveTo(7,-5);ctx.lineTo(11,22);ctx.stroke();
+ctx.strokeStyle=f.flash>0?'#fff':f.spec.color;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(0,-67);ctx.lineTo(0,-28);ctx.lineTo(0,-8);ctx.stroke();
+ctx.fillStyle=f.spec.color;ctx.beginPath();ctx.arc(0,-81,12,0,Math.PI*2);ctx.fill();ctx.fillStyle=f.spec.accent;ctx.beginPath();ctx.arc(3,-84,3,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=f.spec.color;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(0,-65);ctx.lineTo(-13,-43);ctx.lineTo(-20,-29);
+if(armSwing){ctx.moveTo(0,-65);if(f.attackType==='hook')ctx.lineTo(18,-78),ctx.lineTo(34,-58);else if(f.attackType==='body'||f.attackType==='hardBody')ctx.lineTo(20,-43),ctx.lineTo(33,-40);else ctx.lineTo(24,-70),ctx.lineTo(48,-68)}else{ctx.moveTo(0,-65);ctx.lineTo(13,-47);ctx.lineTo(20,-34)}ctx.stroke();
+if(armSwing){ctx.strokeStyle=f.spec.accent;ctx.lineWidth=6;ctx.beginPath();ctx.arc(f.attackType.includes('kick')?9:-23,-32,f.attackType.includes('kick')?25:15,-.7,1.1);ctx.stroke()}
+ctx.restore();
+ctx.fillStyle='#fff';ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText(f.spec.name,x,y-103);
+}
+function drawFan(x,y,flip){ctx.save();ctx.translate(x,y);if(flip)ctx.scale(-1,1);ctx.fillStyle='#161a19';ctx.fillRect(-23,-25,46,8);ctx.fillRect(-4,-17,8,33);ctx.fillStyle='#b9c2bb';ctx.beginPath();ctx.arc(0,-31,24,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#404b45';ctx.lineWidth=2;for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2+elapsed*.18);ctx.fillStyle='#69766d';ctx.beginPath();ctx.ellipse(0,-18,6,15,0,0,Math.PI*2);ctx.fill();ctx.restore()}ctx.strokeStyle='#37443c';ctx.beginPath();ctx.arc(0,-31,24,0,Math.PI*2);ctx.stroke();ctx.restore()}
+function draw(){ctx.clearRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#8fae83');sky.addColorStop(.58,'#597b4d');sky.addColorStop(1,'#334c32');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+// fence and houses
+ctx.fillStyle='#b6aa83';ctx.fillRect(0,H*.32,W,H*.15);ctx.fillStyle='#796b50';for(let x=0;x<W;x+=48){ctx.fillRect(x,H*.31,6,H*.17);ctx.fillRect(x,H*.37,48,4)}
+ctx.fillStyle='#364832';ctx.fillRect(0,H*.48,W,H*.52);
+ctx.fillStyle='#496440';for(let x=0;x<W;x+=72){ctx.beginPath();ctx.arc(x+20,H*.39,45,0,Math.PI*2);ctx.fill()}
+ctx.fillStyle='#777b69';ctx.fillRect(W*.17,H*.45,W*.66,H*.44);ctx.fillStyle='#898b74';ctx.fillRect(W*.19,H*.48,W*.62,H*.38);
+ctx.strokeStyle='#a7a58c';ctx.lineWidth=3;ctx.strokeRect(W*.2,H*.49,W*.6,H*.36);for(let x=W*.22;x<W*.8;x+=50){ctx.beginPath();ctx.moveTo(x,H*.49);ctx.lineTo(x,H*.85);ctx.stroke()}
+ctx.fillStyle='#465246';ctx.fillRect(W*.17,H*.45,5,H*.44);ctx.fillRect(W*.83,H*.45,5,H*.44);
+drawFan(W*.16,H*.75,false);drawFan(W*.84,H*.75,true);
+// backyard details
+ctx.fillStyle='#413c30';ctx.fillRect(W*.04,H*.62,W*.08,8);ctx.fillRect(W*.04,H*.62,8,44);ctx.fillRect(W*.12,H*.62,8,44);ctx.fillStyle='#765c3d';ctx.fillRect(W*.04,H*.61,W*.08,7);
+ctx.fillStyle='#e2d8b7';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('BACKYARD',W/2,H*.27);
+ctx.strokeStyle='#ffffff22';ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(W*.5,H*.5);ctx.lineTo(W*.5,H*.88);ctx.stroke();ctx.setLineDash([]);
+if(player&&enemy){ctx.fillStyle='#15201955';ctx.beginPath();ctx.ellipse(player.x,H*.86,27,7,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(enemy.x,H*.86,27,7,0,0,Math.PI*2);ctx.fill();drawStick(player);drawStick(enemy)}
+for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx/60;p.y+=p.vy/60;p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life/.35);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;if(p.life<=0)particles.splice(i,1)}
+}
+function finish(){playing=false;const won=enemy.hp<=0;$('resultTitle').textContent=won?'YOU WIN!':'KNOCKED OUT';$('resultText').textContent=won?roster[selected].name+' took the backyard. Run it back?':roster[enemyIndex].name+' got the win. Want another round?';$('result').classList.remove('hidden')}
+function frame(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;elapsed+=dt;if(playing){stepFighter(player,dt,enemy);stepFighter(enemy,dt,player);if(player.hp<=0||enemy.hp<=0)finish()}draw();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+})();
+</script></body></html>
