@@ -35,8 +35,18 @@
 .mode-screen .start{background:#dbe7f4;color:#0a1d37;border-radius:3px}
 .mode-screen h1{color:#f4f7fb;letter-spacing:4px}
 .mode-screen p{color:#b6c9df}
+
+/* Keep the opening and mode screens above the game layer and fully tappable. */
+#hud{z-index:2}
+.select{z-index:5}
+.title-screen{isolation:isolate}
+.title-screen:before{z-index:-1}
+.title-start{z-index:2;pointer-events:auto;touch-action:manipulation;cursor:pointer}
+.menu-option,.mode-screen .start{position:relative;z-index:2;touch-action:manipulation}
+.special-row{left:auto;right:clamp(7px,1.5vw,17px);bottom:clamp(170px,27vh,205px);transform:none;z-index:3}
+@media(max-height:390px){.special-row{bottom:112px}}
 </style></head>
-<body><div id="game"><canvas id="scene"></canvas><div id="hud">
+<body><div id="game"><canvas id="scene"></canvas><div id="hud" class="hidden">
 <div class="top"><div class="panel"><div class="name" id="pname">PLAYER</div><span class="number" id="phealth">100</span><div class="health"><span id="pbar"></span></div></div><div class="center">WORKED<div class="sub" id="round">BACKYARD BRAWL • ROUND 1</div></div><div class="panel right"><div class="name" id="ename">OPPONENT</div><span class="number" id="ehealth">100</span><div class="health"><span id="ebar"></span></div></div></div>
 <div class="bottom"><div class="side"><div class="joystick" id="joystick"><div class="joy-base"></div><div class="joy-knob" id="knob"></div><div class="joy-label">MOVE</div></div></div><div class="attacks"><button class="attack" data-action="x">X<small>JAB / LOW KICK</small></button><button class="attack" data-action="o">O<small>JAB / HIGH KICK</small></button><button class="attack" data-action="triangle">△<small>HOOK / BODY</small></button><button class="attack" data-action="square">□<small>HOOK / HARD BODY</small></button></div></div>
 <div class="special-row"><button class="special" id="specialBtn">SPECIAL MOVE</button></div><div class="hint">LEFT JOYSTICK: MOVE • DOUBLE TAP X/O: KICK • DOUBLE TAP △/□: BODY SHOT</div></div>
@@ -80,7 +90,7 @@ function makeFighter(x,index,isPlayer){const diff=difficultyStats[difficulty]||d
 function rosterUI(){$('fighters').innerHTML=roster.map((r,i)=>'<button class="fighter" data-fighter="'+i+'"><div class="swatch" style="background:'+r.color+';box-shadow:inset 0 0 0 8px '+r.accent+'"></div><b>'+r.name+'</b>'+r.style+'</button>').join('');document.querySelectorAll('[data-fighter]').forEach(b=>b.onclick=()=>{selected=+b.dataset.fighter;document.querySelectorAll('[data-fighter]').forEach((el,i)=>el.style.outline=i===selected?'2px solid #c8e18f':'none')})}rosterUI();
 function toast(s){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,850)}
 function updateHud(){$('phealth').textContent=Math.ceil(player.hp);$('ehealth').textContent=Math.ceil(enemy.hp);$('pbar').style.width=(player.hp/player.maxHp*100)+'%';$('ebar').style.width=(enemy.hp/enemy.maxHp*100)+'%'}
-function startFight(mode){gameMode=mode||gameMode;enemyIndex=(selected+1+Math.floor(Math.random()*3))%roster.length;if(gameMode==='tournament'&&tournamentRound>1)enemyIndex=(selected+tournamentRound)%roster.length;player=makeFighter(W*.36,selected,true);enemy=makeFighter(W*.64,enemyIndex,false);particles=[];elapsed=0;playing=true;joy.x=joy.y=0;resetJoy();showOnly(null);$('pname').textContent=gameMode==='tournament'?boxer.name:roster[selected].name;$('ename').textContent=roster[enemyIndex].name;$('round').textContent=gameMode==='practice'?'PRACTICE • ROUND '+tournamentRound:gameMode==='tournament'?'TOURNAMENT • ROUND '+tournamentRound:'ONE ON ONE • '+difficultyStats[difficulty].label;updateHud();toast('FIGHT!')}
+function startFight(mode){$('hud').classList.remove('hidden');gameMode=mode||gameMode;enemyIndex=(selected+1+Math.floor(Math.random()*3))%roster.length;if(gameMode==='tournament'&&tournamentRound>1)enemyIndex=(selected+tournamentRound)%roster.length;player=makeFighter(W*.36,selected,true);enemy=makeFighter(W*.64,enemyIndex,false);particles=[];elapsed=0;playing=true;joy.x=joy.y=0;resetJoy();showOnly(null);$('pname').textContent=gameMode==='tournament'?boxer.name:roster[selected].name;$('ename').textContent=roster[enemyIndex].name;$('round').textContent=gameMode==='practice'?'PRACTICE • ROUND '+tournamentRound:gameMode==='tournament'?'TOURNAMENT • ROUND '+tournamentRound:'ONE ON ONE • '+difficultyStats[difficulty].label;updateHud();toast('FIGHT!')}
 function begin(){difficulty='normal';startFight('one')}
 $('rematch').onclick=begin;
 function burst(x,y,n,color){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*230,vy:(Math.random()-.7)*190,life:.36,color})}
@@ -223,7 +233,7 @@ function draw(){
  for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.x+=p.vx/60;p.y+=p.vy/60;p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life/.36);ctx.fillStyle=p.color;ctx.fillRect(Math.round(p.x),Math.round(p.y),4,4);ctx.globalAlpha=1;if(p.life<=0)particles.splice(i,1)}
  referee();
 }
-function finish(){playing=false;const won=enemy.hp<=0;
+function finish(){playing=false;$('hud').classList.add('hidden');const won=enemy.hp<=0;
 if(gameMode==='practice'){if(won)tournamentRound++;else tournamentRound=1;$('resultTitle').textContent=won?'ROUND WON':'PRACTICE OVER';$('resultText').textContent=won?'Next NPC round starts right away.':'Practice ended. Start again?';$('rematch').textContent=won?'NEXT ROUND':'PRACTICE AGAIN';$('result').classList.remove('hidden');return}
 if(gameMode==='tournament'){if(won){tournamentWins++;tournamentRound++;coins+=100+10*tournamentRound}else{tournamentLosses++;coins+=25}$('postTitle').textContent=won?'TOURNAMENT WIN':'TOURNAMENT LOSS';$('postText').textContent='Record W '+tournamentWins+' • L '+tournamentLosses+' • Coins '+coins+'. '+(won?'Next opponent gets tougher.':'Upgrade and try again.');$('postFight').classList.remove('hidden');return}
 $('resultTitle').textContent=won?'YOU WIN!':'KNOCKED OUT';$('resultText').textContent=won?roster[selected].name+' owns the backyard. Run it back?':roster[enemyIndex].name+' got the win. Try another round?';$('result').classList.remove('hidden')}
