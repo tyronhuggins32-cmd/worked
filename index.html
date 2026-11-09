@@ -116,13 +116,14 @@ ctx.fillStyle='#a97855';ctx.beginPath();ctx.arc(0,-45,12,0,Math.PI*2);ctx.fill()
 function draw(){
 ctx.clearRect(0,0,W,H);let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#7f9a72');g.addColorStop(.48,'#526f49');g.addColorStop(1,'#1d3023');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 ctx.fillStyle='#b9ac83';ctx.fillRect(0,H*.31,W,H*.16);ctx.fillStyle='#74694f';for(let x=0;x<W;x+=42){ctx.fillRect(x,H*.30,5,H*.18);ctx.fillRect(x,H*.36,42,4)}
-ctx.fillStyle='#31472f';for(let x=0;x<W;x+=65){ctx.beginPath();ctx.arc(x+20,H*.35,40,0,Math.PI*2);ctx.fill()}crowd();
+ctx.fillStyle='#31472f';for(let x=0;x<W;x+=65){ctx.beginPath();ctx.arc(x+20,H*.35,40,0,Math.PI*2);ctx.fill()}
 // Referee-height over-the-shoulder view; the ring widens toward the camera.
 ctx.fillStyle='#4a6046';ctx.beginPath();ctx.moveTo(W*.22,H*.48);ctx.lineTo(W*.78,H*.48);ctx.lineTo(W*.94,H*.88);ctx.lineTo(W*.06,H*.88);ctx.closePath();ctx.fill();
 ctx.fillStyle='#7f856e';ctx.beginPath();ctx.moveTo(W*.235,H*.50);ctx.lineTo(W*.765,H*.50);ctx.lineTo(W*.91,H*.85);ctx.lineTo(W*.09,H*.85);ctx.closePath();ctx.fill();
 ctx.strokeStyle='#d0c6a4';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*.235,H*.50);ctx.lineTo(W*.765,H*.50);ctx.lineTo(W*.91,H*.85);ctx.lineTo(W*.09,H*.85);ctx.closePath();ctx.stroke();
 for(let k=0;k<3;k++){const yy=H*(.56+k*.115),spread=.58+k*.14;ctx.strokeStyle=k===1?'#d6d0b8':'#aaa88f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(W*(.5-spread/2),yy);ctx.lineTo(W*(.5+spread/2),yy);ctx.stroke()}
 ctx.strokeStyle='#b6b39a';ctx.lineWidth=2;for(let x of [.235,.765]){ctx.beginPath();ctx.moveTo(W*x,H*.50);ctx.lineTo(W*(x<.5?.09:.91),H*.85);ctx.stroke()}
+crowd();
 // Same fan barriers; the existing fanTimer pushback logic is untouched.
 fan(W*.13,H*.74);fan(W*.87,H*.74);ctx.fillStyle='#e6ddbd';ctx.textAlign='center';ctx.font='bold 12px system-ui';ctx.fillText('WORKED • BACKYARD FIGHT CLUB',W/2,H*.265);
 ctx.fillStyle='#3b4939';ctx.fillRect(W*.035,H*.62,W*.07,8);ctx.fillRect(W*.035,H*.62,7,42);ctx.fillRect(W*.105,H*.62,7,42);
