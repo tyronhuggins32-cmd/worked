@@ -1,83 +1,103 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#172018">
 <title>WORKED — Backyard Brawl</title>
 <style>
-:root{color-scheme:dark;font-family:Inter,system-ui,Arial,sans-serif}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101510;color:#f6f3e8;touch-action:none}#game{position:fixed;inset:0;background:#263b27}canvas{display:block;width:100%;height:100%}#hud{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(8px,2vw,22px)}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.panel{background:#101511d9;border:1px solid #ffffff35;border-radius:12px;padding:9px 13px;backdrop-filter:blur(5px);min-width:120px}.name{font-size:12px;letter-spacing:2px;color:#c5d8b2}.health{height:10px;background:#523d3b;border-radius:20px;overflow:hidden;margin-top:6px}.health span{height:100%;display:block;background:linear-gradient(90deg,#9edc62,#e3db6c);width:100%;transition:width .15s}.right .health span{margin-left:auto;background:linear-gradient(90deg,#f0ae54,#dc6262)}.center{text-align:center;font-weight:900;letter-spacing:3px;font-size:clamp(15px,3vw,26px);text-shadow:0 2px 8px #000}.sub{font-size:10px;letter-spacing:1px;color:#c1c5b7;font-weight:500}.bottom{display:flex;justify-content:space-between;align-items:end;gap:12px}.hint{background:#101511d9;border-radius:10px;padding:8px 11px;font-size:11px;color:#d7ddcb;max-width:38%}.controls{display:flex;gap:8px;align-items:end;pointer-events:auto}.pad{display:grid;grid-template-columns:repeat(2,clamp(48px,8vw,78px));gap:7px}.ctrl{width:clamp(48px,8vw,78px);height:clamp(48px,8vw,78px);border:2px solid #ffffff65;background:#18251edb;color:white;border-radius:50%;font-size:20px;font-weight:900;box-shadow:0 4px 0 #0008;touch-action:none;user-select:none}.ctrl:active,.ctrl.down{transform:translateY(3px);background:#c0d78a;color:#182019}.ctrl small{display:block;font-size:9px;letter-spacing:.5px;font-weight:600}.leftpad{display:flex;gap:6px;pointer-events:auto}.move{border-radius:12px;width:clamp(48px,7vw,66px);height:clamp(46px,6vw,58px);font-size:19px}.select{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#101711ee;border:1px solid #ffffff44;border-radius:18px;padding:22px;max-width:min(92vw,500px);width:90%;text-align:center;pointer-events:auto;box-shadow:0 20px 80px #000a}.select h1{letter-spacing:5px;margin:0;font-size:clamp(25px,6vw,42px)}.select p{color:#c8d2be;font-size:13px;line-height:1.5}.fighters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:17px 0}.fighter{background:#29392b;border:1px solid #ffffff30;border-radius:12px;padding:8px 3px;color:white;font-size:11px}.fighter b{display:block;font-size:12px;margin-top:5px}.swatch{width:34px;height:34px;border-radius:50%;margin:auto;border:3px solid #eee}.start{border:0;border-radius:10px;padding:12px 27px;background:#c8e18f;color:#172017;font-weight:900;letter-spacing:2px;font-size:13px}.hidden{display:none!important}#toast{position:absolute;top:23%;left:50%;transform:translateX(-50%);background:#101711de;padding:8px 13px;border-radius:20px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none}.rotate{position:absolute;inset:0;display:none;background:#111;color:white;align-items:center;justify-content:center;text-align:center;padding:30px;z-index:9}
-@media(orientation:portrait){.rotate{display:flex}}
-</style></head><body><div id="game"><canvas id="scene"></canvas><div id="hud">
-<div class="top"><div class="panel"><div class="name" id="pname">PLAYER 1</div><b id="phealth">100</b><div class="health"><span id="pbar"></span></div></div><div class="center">WORKED<div class="sub" id="round">BACKYARD BRAWL • ROUND 1</div></div><div class="panel right"><div class="name" id="ename">OPPONENT</div><b id="ehealth">100</b><div class="health"><span id="ebar"></span></div></div></div>
-<div class="bottom"><div class="hint">MOVE: ◀ ▶<br>Tap attack once = punch<br>Tap twice = kick / body shot</div><div class="controls"><div class="leftpad"><button class="ctrl move" data-move="left">◀</button><button class="ctrl move" data-move="right">▶</button></div><div class="pad"><button class="ctrl" data-action="x">X<small>JAB / LOW KICK</small></button><button class="ctrl" data-action="o">O<small>JAB / HIGH KICK</small></button><button class="ctrl" data-action="triangle">△<small>HOOK / BODY</small></button><button class="ctrl" data-action="square">□<small>HOOK / BODY</small></button></div></div></div>
-</div><div id="toast"></div>
-<div class="select" id="select"><h1>BACKYARD BRAWL</h1><p>Four fighters. One backyard. Stay off the fans or get pushed back into the fight.</p><div class="fighters" id="fighters"></div><p>Choose your fighter, then take on the CPU.</p><button class="start" id="start">START FIGHT</button></div>
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#f4f1e7}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172018;touch-action:none;user-select:none}#game{position:fixed;inset:0;overflow:hidden;background:#344d32}canvas{display:block;width:100%;height:100%}
+#hud{position:absolute;inset:0;pointer-events:none;padding:clamp(7px,1.5vw,17px);display:flex;flex-direction:column;justify-content:space-between}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.panel{background:#101711dc;border:1px solid #ffffff38;border-radius:10px;padding:7px 11px;min-width:clamp(90px,17vw,175px);backdrop-filter:blur(5px)}.name{font-size:clamp(9px,1.35vw,12px);letter-spacing:1.5px;color:#d1dfc2}.number{font-size:clamp(12px,1.7vw,17px);font-weight:900}.health{height:8px;background:#563e39;border-radius:10px;overflow:hidden;margin-top:4px}.health span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#9bd45e,#e5d96e)}.right .health span{margin-left:auto;background:linear-gradient(90deg,#eab45d,#d65a53)}.center{text-align:center;font-size:clamp(14px,2.8vw,24px);font-weight:1000;letter-spacing:3px;text-shadow:0 2px 8px #000}.sub{font-size:9px;letter-spacing:1px;color:#d1d8c8;font-weight:600}
+.bottom{display:flex;justify-content:space-between;align-items:end}.side{pointer-events:auto;display:flex;align-items:end}.joystick{width:clamp(100px,17vw,148px);height:clamp(100px,17vw,148px);position:relative;touch-action:none}.joy-base{position:absolute;inset:8%;border-radius:50%;border:2px solid #ffffff55;background:#101711a8;box-shadow:inset 0 0 22px #0008}.joy-base:before,.joy-base:after{content:"";position:absolute;background:#ffffff20}.joy-base:before{left:50%;top:8%;bottom:8%;width:1px}.joy-base:after{top:50%;left:8%;right:8%;height:1px}.joy-knob{position:absolute;width:42%;height:42%;left:29%;top:29%;border-radius:50%;border:2px solid #ffffffa0;background:radial-gradient(circle at 35% 30%,#829b76,#344d37 70%);box-shadow:0 4px 12px #0009;pointer-events:none}.joy-label{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:1px;color:#f4f1e7;background:#101711a8;padding:2px 7px;border-radius:8px}
+.attacks{display:grid;grid-template-columns:repeat(2,clamp(55px,8.5vw,78px));gap:7px;pointer-events:auto}.attack{width:clamp(55px,8.5vw,78px);height:clamp(55px,8.5vw,78px);border:2px solid #ffffff8a;background:#15221cdb;color:#fff;border-radius:50%;font-size:21px;font-weight:1000;box-shadow:0 4px 0 #0009;touch-action:none}.attack small{display:block;font-size:clamp(7px,1vw,9px);letter-spacing:.3px;font-weight:700}.attack:active,.attack.down{transform:translateY(3px);background:#c5dc91;color:#152018}.hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:9px;color:#e1e7d8;background:#101711a8;border-radius:9px;padding:5px 9px;white-space:nowrap;pointer-events:none}
+.select{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(90vw,520px);max-height:90vh;overflow:auto;background:#101711f2;border:1px solid #ffffff48;border-radius:17px;padding:clamp(13px,3vw,23px);text-align:center;box-shadow:0 20px 80px #000b;pointer-events:auto}.select h1{font-size:clamp(23px,5vw,40px);letter-spacing:4px;margin:0}.select p{font-size:12px;line-height:1.5;color:#d0d8c9}.fighters{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:13px 0}.fighter{background:#29392b;border:1px solid #ffffff38;border-radius:11px;padding:8px 3px;color:white;font-size:10px}.fighter b{display:block;font-size:12px;margin-top:5px}.swatch{height:32px;width:32px;border-radius:50%;margin:auto;border:3px solid #eee}.start{border:0;border-radius:9px;padding:12px 26px;background:#c8e18f;color:#172017;font-weight:1000;letter-spacing:2px}.hidden{display:none!important}#toast{position:absolute;top:24%;left:50%;transform:translateX(-50%);background:#101711e8;padding:8px 13px;border-radius:20px;font-weight:900;font-size:12px;opacity:0;transition:opacity .15s;pointer-events:none}.rotate{position:absolute;inset:0;display:none;z-index:10;background:#111;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:18px}.rotate span{font-size:42px;display:block;margin-bottom:12px}
+@media(orientation:portrait){.rotate{display:flex}.select{display:none}}
+@media(max-height:390px){.joystick{width:90px;height:90px}.attack{width:49px;height:49px;font-size:17px}.attacks{grid-template-columns:repeat(2,49px);gap:5px}.panel{padding:5px 8px}.hint{bottom:5px}}
+</style></head>
+<body><div id="game"><canvas id="scene"></canvas><div id="hud">
+<div class="top"><div class="panel"><div class="name" id="pname">PLAYER</div><span class="number" id="phealth">100</span><div class="health"><span id="pbar"></span></div></div><div class="center">WORKED<div class="sub" id="round">BACKYARD BRAWL • ROUND 1</div></div><div class="panel right"><div class="name" id="ename">OPPONENT</div><span class="number" id="ehealth">100</span><div class="health"><span id="ebar"></span></div></div></div>
+<div class="bottom"><div class="side"><div class="joystick" id="joystick"><div class="joy-base"></div><div class="joy-knob" id="knob"></div><div class="joy-label">MOVE</div></div></div><div class="attacks"><button class="attack" data-action="x">X<small>JAB / LOW KICK</small></button><button class="attack" data-action="o">O<small>JAB / HIGH KICK</small></button><button class="attack" data-action="triangle">△<small>HOOK / BODY</small></button><button class="attack" data-action="square">□<small>HOOK / HARD BODY</small></button></div></div>
+<div class="hint">LEFT JOYSTICK: MOVE • DOUBLE TAP X/O: KICK • DOUBLE TAP △/□: BODY SHOT</div></div>
+<div id="toast"></div>
+<div class="select" id="select"><h1>BACKYARD BRAWL</h1><p>Four stick fighters. One backyard. The fans are the barriers — stand by them too long and they'll blow you back toward the fight.</p><div class="fighters" id="fighters"></div><p>Choose your fighter, then fight the CPU.</p><button class="start" id="start">START FIGHT</button></div>
 <div class="select hidden" id="result"><h1 id="resultTitle">KNOCKOUT</h1><p id="resultText"></p><button class="start" id="rematch">RUN IT BACK</button></div>
-<div class="rotate">↻<br><br><b>ROTATE YOUR DEVICE</b><br><br>WORKED is designed to be played sideways in landscape mode.</div>
-</div>
+<div class="rotate"><div><span>↻</span><b>TURN YOUR PHONE SIDEWAYS</b><p>WORKED is designed for landscape play.</p></div></div></div>
 <script>
 (()=>{
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
 const roster=[
-{name:'ACE',color:'#e8e2d2',accent:'#d7b35c',style:'Balanced',speed:1,power:1},
-{name:'BRICK',color:'#d9d2c4',accent:'#bf5750',style:'Power',speed:.82,power:1.28},
-{name:'QUICK',color:'#d3ded4',accent:'#5ca5a2',style:'Speed',speed:1.28,power:.82},
-{name:'GHOST',color:'#d7d2e7',accent:'#927bc2',style:'Counter',speed:1.08,power:1.05}
+{name:'ACE',color:'#e9e3d5',accent:'#d6b35c',style:'BALANCED',speed:1,power:1},
+{name:'BRICK',color:'#d9d2c4',accent:'#c35b50',style:'POWER',speed:.82,power:1.28},
+{name:'QUICK',color:'#d3ded4',accent:'#5ca5a2',style:'SPEED',speed:1.28,power:.82},
+{name:'GHOST',color:'#d7d2e7',accent:'#927bc2',style:'COUNTER',speed:1.08,power:1.05}
 ];
-let W=0,H=0,dpr=1,last=0,elapsed=0,playing=false,selected=0,enemyIndex=1,player,enemy,particles=[],keys={},fanPush=0,toastTimer=0;
+let W=0,H=0,dpr=1,last=0,elapsed=0,playing=false,selected=0,enemyIndex=1,player,enemy,particles=[],joy={x:0,y:0,active:false,id:null},toastTimer=0;
 const $=id=>document.getElementById(id);
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
 addEventListener('resize',resize);resize();
-function makeFighter(x,index,playerSide){const spec=roster[index];return{x,y:H*.69,vx:0,vy:0,hp:100,max:100,face:playerSide?1:-1,index,spec,player:playerSide,attack:0,attackType:'jab',cool:0,stun:0,guard:0,flash:0,air:0,fanTimer:0,combo:0,comboTime:0}}
-function rosterUI(){$('fighters').innerHTML=roster.map((r,i)=>'<button class="fighter" data-fighter="'+i+'"><div class="swatch" style="background:'+r.color+';box-shadow:inset 0 0 0 8px '+r.accent+'"></div><b>'+r.name+'</b>'+r.style+'</button>').join('');document.querySelectorAll('[data-fighter]').forEach(b=>b.onclick=()=>{selected=+b.dataset.fighter;document.querySelectorAll('[data-fighter]').forEach((el,i)=>el.style.outline=i===selected?'2px solid #c8e18f':'none')})}
-rosterUI();
-function begin(){enemyIndex=(selected+1+Math.floor(Math.random()*3))%4;player=makeFighter(W*.34,selected,true);enemy=makeFighter(W*.66,enemyIndex,false);player.y=enemy.y=H*.72;particles=[];elapsed=0;fanPush=0;playing=true;$('select').classList.add('hidden');$('result').classList.add('hidden');$('pname').textContent=roster[selected].name;$('ename').textContent=roster[enemyIndex].name;$('round').textContent='BACKYARD BRAWL • ROUND 1';updateHud();toast('FIGHT!')}
-$('start').onclick=begin;$('rematch').onclick=begin;
-function toast(s){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,1000)}
+function makeFighter(x,index,isPlayer){return{x,y:H*.70,vx:0,vy:0,hp:100,face:isPlayer?1:-1,index,spec:roster[index],player:isPlayer,attack:0,attackType:'jab',cool:0,stun:0,flash:0,fanTimer:0,combo:0,comboTime:0,fall:0,downTime:0,pose:0,limb:0}}
+function rosterUI(){$('fighters').innerHTML=roster.map((r,i)=>'<button class="fighter" data-fighter="'+i+'"><div class="swatch" style="background:'+r.color+';box-shadow:inset 0 0 0 8px '+r.accent+'"></div><b>'+r.name+'</b>'+r.style+'</button>').join('');document.querySelectorAll('[data-fighter]').forEach(b=>b.onclick=()=>{selected=+b.dataset.fighter;document.querySelectorAll('[data-fighter]').forEach((el,i)=>el.style.outline=i===selected?'2px solid #c8e18f':'none')})}rosterUI();
+function toast(s){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,850)}
 function updateHud(){$('phealth').textContent=Math.ceil(player.hp);$('ehealth').textContent=Math.ceil(enemy.hp);$('pbar').style.width=player.hp+'%';$('ebar').style.width=enemy.hp+'%'}
-function attack(f,type){if(!playing||f.cool>0||f.stun>0)return;f.attack=.26;f.attackType=type;f.cool=.35;f.comboTime=.6;f.combo++;const opponent=f.player?enemy:player;const dist=Math.abs(opponent.x-f.x);let reach=type.includes('kick')?105:85;if(dist<reach){let damage=(type==='hardBody'?15:type==='body'?11:type==='hook'?12:type.includes('kick')?10:7)*f.spec.power; if(opponent.guard>0)damage*=.35;opponent.hp=Math.max(0,opponent.hp-damage);opponent.stun=.15+(damage/100);opponent.vx+=f.face*(type.includes('kick')?220:150);opponent.vy-=type.includes('kick')?90:35;opponent.flash=.13;burst(opponent.x,opponent.y-55,7,f.spec.accent);updateHud();if(type==='hardBody')toast('BODY SHOT!');else if(type.includes('kick'))toast('KICK!');}
+function begin(){enemyIndex=(selected+1+Math.floor(Math.random()*3))%4;player=makeFighter(W*.36,selected,true);enemy=makeFighter(W*.64,enemyIndex,false);particles=[];elapsed=0;playing=true;joy.x=joy.y=0;resetJoy();$('select').classList.add('hidden');$('result').classList.add('hidden');$('pname').textContent=roster[selected].name;$('ename').textContent=roster[enemyIndex].name;$('round').textContent='BACKYARD BRAWL • ROUND 1';updateHud();toast('FIGHT!')}
+$('start').onclick=begin;$('rematch').onclick=begin;
+function burst(x,y,n,color){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*230,vy:(Math.random()-.7)*190,life:.36,color})}
+function strike(f,type){if(!playing||f.cool>0||f.stun>0||f.fall>0)return;f.attack=.25;f.attackType=type;f.cool=.19;f.comboTime=.7;f.combo++;const op=f.player?enemy:player;const dist=Math.abs(op.x-f.x);const reach=type.includes('kick')?112:94;if(dist<reach){let damage=(type==='hardBody'?15:type==='body'?11:type==='hook'?12:type.includes('kick')?10:7)*f.spec.power;if(op.guard>0)damage*=.35;op.hp=Math.max(0,op.hp-damage);op.stun=.22+damage/160;op.vx+=f.face*(type.includes('kick')?235:175);op.vy-=type.includes('kick')?125:65;op.flash=.18;op.fall=Math.max(op.fall,type==='hardBody'?.24:.12);burst(op.x,op.y-49,8,f.spec.accent);updateHud();if(type==='hardBody')toast('HARD BODY SHOT!');else if(type==='body')toast('BODY SHOT!');else if(type.includes('kick'))toast('KICK!')}}
+function action(key){if(!playing)return;const f=player,now=performance.now();f.lastTap??={};const prev=f.lastTap[key]||0;const twice=now-prev<330;f.lastTap[key]=now;let type;if(key==='x')type=twice?'lowKick':'jab';if(key==='o')type=twice?'highKick':'jab';if(key==='triangle')type=twice?'body':'hook';if(key==='square')type=twice?'hardBody':'hook';strike(f,type)}
+document.querySelectorAll('[data-action]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');action(b.dataset.action)});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>b.classList.remove('down')))});
+const joyEl=$('joystick'),knob=$('knob');
+function resetJoy(){knob.style.transform='translate(0px,0px)';joy.x=joy.y=0;joy.active=false;joy.id=null}
+function moveJoy(e){const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,max=r.width*.31,len=Math.hypot(dx,dy),scale=len>max?max/len:1;const x=dx*scale,y=dy*scale;knob.style.transform='translate('+x+'px,'+y+'px)';joy.x=x/max;joy.y=y/max}
+joyEl.addEventListener('pointerdown',e=>{e.preventDefault();joy.active=true;joy.id=e.pointerId;joyEl.setPointerCapture(e.pointerId);moveJoy(e)});
+joyEl.addEventListener('pointermove',e=>{if(joy.active&&e.pointerId===joy.id)moveJoy(e)});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>joyEl.addEventListener(ev,e=>{if(e.pointerId===joy.id)resetJoy()}));
+addEventListener('keydown',e=>{if(e.repeat)return;if(e.key.toLowerCase()==='j')action('x');if(e.key.toLowerCase()==='k')action('o');if(e.key.toLowerCase()==='u')action('triangle');if(e.key.toLowerCase()==='i')action('square');if(e.key==='ArrowLeft'||e.key==='a')joy.x=-1;if(e.key==='ArrowRight'||e.key==='d')joy.x=1});
+addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','a','d'].includes(e.key))joy.x=0});
+function stepFighter(f,dt,op){
+f.cool=Math.max(0,f.cool-dt);f.attack=Math.max(0,f.attack-dt);f.stun=Math.max(0,f.stun-dt);f.flash=Math.max(0,f.flash-dt);f.comboTime=Math.max(0,f.comboTime-dt);if(!f.comboTime)f.combo=0;
+let mx=0,my=0;if(f.player){mx=joy.x;my=joy.y}else{const dx=op.x-f.x,dy=op.y-f.y;if(Math.abs(dx)>83)mx=Math.sign(dx);if(Math.abs(dy)>38)my=Math.sign(dy)*.35;if(Math.abs(dx)<98&&f.cool<=0&&Math.random()<dt*1.7)strike(f,['jab','hook','lowKick'][Math.floor(Math.random()*3)])}
+if(f.stun<=0&&f.fall<=0){f.vx+=mx*720*f.spec.speed*dt;f.vy+=my*330*dt;if(mx)f.face=Math.sign(mx)}else{f.vx*=.985;f.vy*=.985}
+f.vx*=Math.pow(.018,dt);f.vy*=Math.pow(.018,dt);f.vx=Math.max(-320,Math.min(320,f.vx));f.vy=Math.max(-130,Math.min(130,f.vy));f.x+=f.vx*dt;f.y+=f.vy*dt;
+const minX=W*.13,maxX=W*.87,minY=H*.52,maxY=H*.82;f.x=Math.max(minX,Math.min(maxX,f.x));f.y=Math.max(minY,Math.min(maxY,f.y));
+if(f.x<W*.19||f.x>W*.81){f.fanTimer+=dt;if(f.fanTimer>1.05){const dir=f.x<W*.19?1:-1;f.vx+=dir*185;f.x+=dir*23;f.fanTimer=0;if(f.player)toast('FAN PUSH!');burst(f.x,f.y-10,6,'#b9d6e8')}}else f.fanTimer=Math.max(0,f.fanTimer-dt*1.5);
+f.fall=Math.max(0,f.fall-dt);if(f.fall===0&&f.stun===0){f.y+=(H*.70-f.y)*Math.min(1,dt*5)}
 }
-function handleAction(action){if(!playing)return;const f=player,now=performance.now();f.tapTimes??={};const prev=f.tapTimes[action]||0;f.tapTimes[action]=now;const twice=now-prev<340;let type;if(action==='x')type=twice?'lowKick':'jab';if(action==='o')type=twice?'highKick':'jab';if(action==='triangle')type=twice?'body':'hook';if(action==='square')type=twice?'hardBody':'hook';attack(f,type)}
-function burst(x,y,n,color){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*220,vy:(Math.random()-.7)*180,life:.35,color})}
-document.querySelectorAll('[data-action]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');handleAction(b.dataset.action)});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>b.classList.remove('down')))});
-document.querySelectorAll('[data-move]').forEach(b=>{const m=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[m]=true;b.classList.add('down')});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>{keys[m]=false;b.classList.remove('down')}))});
-addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','a','d',' '].includes(e.key))e.preventDefault();keys[e.key==='ArrowLeft'||e.key==='a'?'left':e.key==='ArrowRight'||e.key==='d'?'right':e.key]=true;if(e.repeat)return;if(e.key.toLowerCase()==='j')handleAction('x');if(e.key.toLowerCase()==='k')handleAction('o');if(e.key.toLowerCase()==='u')handleAction('triangle');if(e.key.toLowerCase()==='i')handleAction('square')});
-addEventListener('keyup',e=>{keys[e.key==='ArrowLeft'||e.key==='a'?'left':e.key==='ArrowRight'||e.key==='d'?'right':e.key]=false});
-function stepFighter(f,dt,op){f.cool=Math.max(0,f.cool-dt);f.attack=Math.max(0,f.attack-dt);f.stun=Math.max(0,f.stun-dt);f.flash=Math.max(0,f.flash-dt);f.comboTime=Math.max(0,f.comboTime-dt);if(f.comboTime===0)f.combo=0;
-let move=0;if(f.player){move=(keys.right?1:0)-(keys.left?1:0)}else{const d=op.x-f.x;if(Math.abs(d)>77)move=Math.sign(d);if(Math.abs(d)<68&&Math.random()<dt*1.6)attack(f,['jab','hook','lowKick'][Math.floor(Math.random()*3)]);}
-if(f.stun<=0){f.vx+=move*650*f.spec.speed*dt;if(move)f.face=Math.sign(move);else f.vx*=Math.pow(.0008,dt);if(Math.abs(op.x-f.x)<65&&f.attack===0)f.vx*=.85}else f.vx*=.97;
-f.vx=Math.max(-270,Math.min(270,f.vx));f.x+=f.vx*dt;const margin=62;f.x=Math.max(margin,Math.min(W-margin,f.x));f.y=H*.72+Math.sin(elapsed*5+(f.player?0:1))*(Math.abs(f.vx)>20?2:0);
-const fanLeft=W*.17,fanRight=W*.83;if(f.x<fanLeft||f.x>fanRight){f.fanTimer+=dt;if(f.fanTimer>1.05){const direction=f.x<fanLeft?1:-1;f.vx+=direction*220;f.x+=direction*28;f.fanTimer=0;if(f.player)toast('FAN PUSH!');burst(f.x,f.y-12,5,'#b5d6ed')}}else f.fanTimer=Math.max(0,f.fanTimer-dt*1.5);
+function line(x1,y1,x2,y2,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+function drawStick(f){
+const x=f.x,y=f.y,face=f.face,knock=f.fall>0?Math.min(1,f.fall*3):0,lean=(f.stun>0?-.25:0)+knock*.9, bob=Math.sin(elapsed*9+(f.player?0:1))*1.5, col=f.flash>0?'#fff':f.spec.color;
+ctx.save();ctx.translate(x,y);ctx.scale(face,1);ctx.rotate(lean);ctx.lineCap='round';ctx.lineJoin='round';
+ctx.fillStyle='#0005';ctx.beginPath();ctx.ellipse(0,8,26,7,0,0,Math.PI*2);ctx.fill();
+const hipY=-28+bob,shoulderY=-65+bob,headY=-84+bob;
+const kick=f.attack>0&&f.attackType.includes('kick'),hook=f.attack>0&&f.attackType==='hook',body=f.attack>0&&(f.attackType==='body'||f.attackType==='hardBody');
+let armA=hook?-.95:body?-.25:f.attack>0?-.55:.15,armB=hook?-.2:body?.12:f.attack>0?-.5:.45;
+let legA=kick?-.9:0,legB=kick?-.25:0;
+const shoulderL={x:-1,y:shoulderY},shoulderR={x:1,y:shoulderY};
+line(-1,shoulderY,0,hipY,col,8);line(0,hipY,-11,2,col,7);line(0,hipY,12,2,col,7);
+line(-11,2,-14+legA*18,28+legA*5,col,7);line(12,2,13+legB*24,28+legB*7,col,7);
+line(-14+legA*18,28+legA*5,-23+legA*18,30+legA*5,col,6);line(13+legB*24,28+legB*7,24+legB*24,30+legB*7,col,6);
+line(-1,shoulderY,-16+armA*13,-45+armA*8,col,7);line(-16+armA*13,-45+armA*8,-22+armA*20,-32+armA*12,col,6);
+line(1,shoulderY,17+armB*12,-47+armB*8,col,7);line(17+armB*12,-47+armB*8,(f.attack>0?44:25)+armB*15,-48+armB*10,col,6);
+ctx.fillStyle=col;ctx.beginPath();ctx.arc(0,headY,11,0,Math.PI*2);ctx.fill();ctx.fillStyle=f.spec.accent;ctx.beginPath();ctx.arc(4,headY-2,3,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=f.spec.accent;ctx.fillRect(-7,-60,14,4);
+if(f.attack>0){ctx.strokeStyle=f.spec.accent;ctx.lineWidth=4;ctx.beginPath();ctx.arc(kick?20:30,-44,kick?25:14,-.8,.8);ctx.stroke()}
+ctx.restore();ctx.textAlign='center';ctx.font='bold 10px system-ui';ctx.fillStyle='#fff';ctx.fillText(f.spec.name,x,y-110);
 }
-function drawStick(f){const x=f.x,y=f.y,face=f.face,scale=1;const armSwing=f.attack>0?1:0;ctx.save();ctx.translate(x,y);ctx.scale(face,1);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=f.flash>0?'#ffffff':f.spec.color;ctx.fillStyle=f.spec.color;ctx.lineWidth=7;
-ctx.beginPath();ctx.ellipse(0,4,19,5,0,0,Math.PI*2);ctx.fillStyle='#0005';ctx.fill();
-ctx.strokeStyle='#171817';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(-7,-5);ctx.lineTo(-10,22);ctx.moveTo(7,-5);ctx.lineTo(11,22);ctx.stroke();
-ctx.strokeStyle=f.flash>0?'#fff':f.spec.color;ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(0,-67);ctx.lineTo(0,-28);ctx.lineTo(0,-8);ctx.stroke();
-ctx.fillStyle=f.spec.color;ctx.beginPath();ctx.arc(0,-81,12,0,Math.PI*2);ctx.fill();ctx.fillStyle=f.spec.accent;ctx.beginPath();ctx.arc(3,-84,3,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle=f.spec.color;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(0,-65);ctx.lineTo(-13,-43);ctx.lineTo(-20,-29);
-if(armSwing){ctx.moveTo(0,-65);if(f.attackType==='hook')ctx.lineTo(18,-78),ctx.lineTo(34,-58);else if(f.attackType==='body'||f.attackType==='hardBody')ctx.lineTo(20,-43),ctx.lineTo(33,-40);else ctx.lineTo(24,-70),ctx.lineTo(48,-68)}else{ctx.moveTo(0,-65);ctx.lineTo(13,-47);ctx.lineTo(20,-34)}ctx.stroke();
-if(armSwing){ctx.strokeStyle=f.spec.accent;ctx.lineWidth=6;ctx.beginPath();ctx.arc(f.attackType.includes('kick')?9:-23,-32,f.attackType.includes('kick')?25:15,-.7,1.1);ctx.stroke()}
-ctx.restore();
-ctx.fillStyle='#fff';ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText(f.spec.name,x,y-103);
+function fan(x,y){ctx.save();ctx.translate(x,y);ctx.fillStyle='#171d19';ctx.fillRect(-22,-23,44,8);ctx.fillRect(-4,-15,8,27);ctx.fillStyle='#b9c4ba';ctx.beginPath();ctx.arc(0,-29,23,0,Math.PI*2);ctx.fill();for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2+elapsed*3);ctx.fillStyle='#65776b';ctx.beginPath();ctx.ellipse(0,-15,6,14,0,0,Math.PI*2);ctx.fill();ctx.restore()}ctx.strokeStyle='#35483b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-29,23,0,Math.PI*2);ctx.stroke();ctx.restore()}
+function draw(){
+ctx.clearRect(0,0,W,H);let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#8da980');g.addColorStop(.48,'#55764a');g.addColorStop(1,'#273e29');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+// backyard tree line and fence
+ctx.fillStyle='#b9ac83';ctx.fillRect(0,H*.32,W,H*.14);ctx.fillStyle='#74694f';for(let x=0;x<W;x+=42){ctx.fillRect(x,H*.31,5,H*.16);ctx.fillRect(x,H*.37,42,4)}
+ctx.fillStyle='#31472f';for(let x=0;x<W;x+=65){ctx.beginPath();ctx.arc(x+20,H*.36,40,0,Math.PI*2);ctx.fill()}
+ctx.fillStyle='#697763';ctx.fillRect(W*.12,H*.47,W*.76,H*.42);ctx.fillStyle='#858873';ctx.fillRect(W*.14,H*.49,W*.72,H*.37);ctx.strokeStyle='#aaa78b';ctx.lineWidth=3;ctx.strokeRect(W*.15,H*.50,W*.70,H*.35);
+ctx.fillStyle='#4d5948';ctx.fillRect(W*.12,H*.47,5,H*.42);ctx.fillRect(W*.88,H*.47,5,H*.42);
+for(let x=W*.18;x<W*.84;x+=55){ctx.strokeStyle='#a6a48a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,H*.5);ctx.lineTo(x,H*.85);ctx.stroke()}
+fan(W*.13,H*.74);fan(W*.87,H*.74);
+ctx.fillStyle='#e6ddbd';ctx.textAlign='center';ctx.font='bold 12px system-ui';ctx.fillText('BACKYARD',W/2,H*.27);
+ctx.fillStyle='#3b4939';ctx.fillRect(W*.035,H*.62,W*.07,8);ctx.fillRect(W*.035,H*.62,7,42);ctx.fillRect(W*.105,H*.62,7,42);
+if(player&&enemy){drawStick(player);drawStick(enemy)}
+for(let i=particles.length-1;i>=0;i--){let p=particles[i];p.x+=p.vx/60;p.y+=p.vy/60;p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life/.36);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;if(p.life<=0)particles.splice(i,1)}
 }
-function drawFan(x,y,flip){ctx.save();ctx.translate(x,y);if(flip)ctx.scale(-1,1);ctx.fillStyle='#161a19';ctx.fillRect(-23,-25,46,8);ctx.fillRect(-4,-17,8,33);ctx.fillStyle='#b9c2bb';ctx.beginPath();ctx.arc(0,-31,24,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#404b45';ctx.lineWidth=2;for(let i=0;i<4;i++){ctx.save();ctx.rotate(i*Math.PI/2+elapsed*.18);ctx.fillStyle='#69766d';ctx.beginPath();ctx.ellipse(0,-18,6,15,0,0,Math.PI*2);ctx.fill();ctx.restore()}ctx.strokeStyle='#37443c';ctx.beginPath();ctx.arc(0,-31,24,0,Math.PI*2);ctx.stroke();ctx.restore()}
-function draw(){ctx.clearRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#8fae83');sky.addColorStop(.58,'#597b4d');sky.addColorStop(1,'#334c32');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
-// fence and houses
-ctx.fillStyle='#b6aa83';ctx.fillRect(0,H*.32,W,H*.15);ctx.fillStyle='#796b50';for(let x=0;x<W;x+=48){ctx.fillRect(x,H*.31,6,H*.17);ctx.fillRect(x,H*.37,48,4)}
-ctx.fillStyle='#364832';ctx.fillRect(0,H*.48,W,H*.52);
-ctx.fillStyle='#496440';for(let x=0;x<W;x+=72){ctx.beginPath();ctx.arc(x+20,H*.39,45,0,Math.PI*2);ctx.fill()}
-ctx.fillStyle='#777b69';ctx.fillRect(W*.17,H*.45,W*.66,H*.44);ctx.fillStyle='#898b74';ctx.fillRect(W*.19,H*.48,W*.62,H*.38);
-ctx.strokeStyle='#a7a58c';ctx.lineWidth=3;ctx.strokeRect(W*.2,H*.49,W*.6,H*.36);for(let x=W*.22;x<W*.8;x+=50){ctx.beginPath();ctx.moveTo(x,H*.49);ctx.lineTo(x,H*.85);ctx.stroke()}
-ctx.fillStyle='#465246';ctx.fillRect(W*.17,H*.45,5,H*.44);ctx.fillRect(W*.83,H*.45,5,H*.44);
-drawFan(W*.16,H*.75,false);drawFan(W*.84,H*.75,true);
-// backyard details
-ctx.fillStyle='#413c30';ctx.fillRect(W*.04,H*.62,W*.08,8);ctx.fillRect(W*.04,H*.62,8,44);ctx.fillRect(W*.12,H*.62,8,44);ctx.fillStyle='#765c3d';ctx.fillRect(W*.04,H*.61,W*.08,7);
-ctx.fillStyle='#e2d8b7';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('BACKYARD',W/2,H*.27);
-ctx.strokeStyle='#ffffff22';ctx.setLineDash([8,8]);ctx.beginPath();ctx.moveTo(W*.5,H*.5);ctx.lineTo(W*.5,H*.88);ctx.stroke();ctx.setLineDash([]);
-if(player&&enemy){ctx.fillStyle='#15201955';ctx.beginPath();ctx.ellipse(player.x,H*.86,27,7,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(enemy.x,H*.86,27,7,0,0,Math.PI*2);ctx.fill();drawStick(player);drawStick(enemy)}
-for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx/60;p.y+=p.vy/60;p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life/.35);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;if(p.life<=0)particles.splice(i,1)}
-}
-function finish(){playing=false;const won=enemy.hp<=0;$('resultTitle').textContent=won?'YOU WIN!':'KNOCKED OUT';$('resultText').textContent=won?roster[selected].name+' took the backyard. Run it back?':roster[enemyIndex].name+' got the win. Want another round?';$('result').classList.remove('hidden')}
-function frame(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;elapsed+=dt;if(playing){stepFighter(player,dt,enemy);stepFighter(enemy,dt,player);if(player.hp<=0||enemy.hp<=0)finish()}draw();requestAnimationFrame(frame)}
-requestAnimationFrame(frame);
+function finish(){playing=false;const won=enemy.hp<=0;$('resultTitle').textContent=won?'YOU WIN!':'KNOCKED OUT';$('resultText').textContent=won?roster[selected].name+' owns the backyard. Run it back?':roster[enemyIndex].name+' got the win. Try another round?';$('result').classList.remove('hidden')}
+function frame(t){const dt=Math.min(.033,(t-last)/1000||0);last=t;elapsed+=dt;if(playing){stepFighter(player,dt,enemy);stepFighter(enemy,dt,player);if(player.hp<=0||enemy.hp<=0)finish()}draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 })();
 </script></body></html>
