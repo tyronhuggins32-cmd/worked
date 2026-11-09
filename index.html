@@ -36,14 +36,31 @@ let W=0,H=0,dpr=1,last=0,elapsed=0,playing=false,selected=0,enemyIndex=1,player,
 const $=id=>document.getElementById(id);
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
 addEventListener('resize',resize);resize();
-function makeFighter(x,index,isPlayer){return{x,y:H*.70,vx:0,vy:0,hp:100,face:isPlayer?1:-1,index,spec:roster[index],player:isPlayer,attack:0,attackType:'jab',cool:0,stun:0,flash:0,fanTimer:0,combo:0,comboTime:0,fall:0,downTime:0,pose:0,limb:0,anim:'idle',animClock:0}}
+function makeFighter(x,index,isPlayer){return{x,y:H*.70,vx:0,vy:0,hp:180,maxHp:180,face:isPlayer?1:-1,index,spec:roster[index],player:isPlayer,attack:0,attackType:'jab',cool:0,stun:0,flash:0,fanTimer:0,combo:0,comboTime:0,fall:0,downTime:0,pose:0,limb:0,anim:'idle',animClock:0}}
 function rosterUI(){$('fighters').innerHTML=roster.map((r,i)=>'<button class="fighter" data-fighter="'+i+'"><div class="swatch" style="background:'+r.color+';box-shadow:inset 0 0 0 8px '+r.accent+'"></div><b>'+r.name+'</b>'+r.style+'</button>').join('');document.querySelectorAll('[data-fighter]').forEach(b=>b.onclick=()=>{selected=+b.dataset.fighter;document.querySelectorAll('[data-fighter]').forEach((el,i)=>el.style.outline=i===selected?'2px solid #c8e18f':'none')})}rosterUI();
 function toast(s){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.opacity=0,850)}
-function updateHud(){$('phealth').textContent=Math.ceil(player.hp);$('ehealth').textContent=Math.ceil(enemy.hp);$('pbar').style.width=player.hp+'%';$('ebar').style.width=enemy.hp+'%'}
+function updateHud(){$('phealth').textContent=Math.ceil(player.hp);$('ehealth').textContent=Math.ceil(enemy.hp);$('pbar').style.width=(player.hp/player.maxHp*100)+'%';$('ebar').style.width=(enemy.hp/enemy.maxHp*100)+'%'}
 function begin(){enemyIndex=(selected+1+Math.floor(Math.random()*3))%4;player=makeFighter(W*.36,selected,true);enemy=makeFighter(W*.64,enemyIndex,false);particles=[];elapsed=0;playing=true;joy.x=joy.y=0;resetJoy();$('select').classList.add('hidden');$('result').classList.add('hidden');$('pname').textContent=roster[selected].name;$('ename').textContent=roster[enemyIndex].name;$('round').textContent='BACKYARD BRAWL • ROUND 1';updateHud();toast('FIGHT!')}
 $('start').onclick=begin;$('rematch').onclick=begin;
 function burst(x,y,n,color){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*230,vy:(Math.random()-.7)*190,life:.36,color})}
-function strike(f,type){if(!playing||f.cool>0||f.stun>0||f.fall>0)return;f.attack=.25;f.attackType=type;f.anim=type;f.animClock=0;f.cool=.19;f.comboTime=.7;f.combo++;const op=f.player?enemy:player;const dist=Math.abs(op.x-f.x);const reach=type.includes('kick')?112:94;if(dist<reach){let damage=(type==='hardBody'?15:type==='body'?11:type.includes('Hook')?12:type.includes('kick')?10:7)*f.spec.power;if(op.guard>0)damage*=.35;op.hp=Math.max(0,op.hp-damage);op.stun=.22+damage/160;op.vx+=f.face*(type.includes('kick')?235:175);op.vy-=type.includes('kick')?125:65;op.flash=.18;op.fall=Math.max(op.fall,type==='hardBody'?.24:.12);burst(op.x,op.y-49,8,f.spec.accent);updateHud();if(type==='hardBody')toast('HARD BODY SHOT!');else if(type==='body')toast('BODY SHOT!');else if(type.includes('kick'))toast('KICK!')}}
+function strike(f,type){
+ if(!playing||f.cool>0||f.stun>0||f.fall>0)return;
+ f.attack=.34;f.attackType=type;f.anim=type;f.animClock=0;f.cool=.24;f.comboTime=.7;f.combo++;
+ const op=f.player?enemy:player;
+ const isKick=type.toLowerCase().includes('kick');
+ const reach=isKick?142:112;
+ const verticalReach=isKick?66:52;
+ const distance=Math.abs(op.x-f.x),verticalDistance=Math.abs(op.y-f.y);
+ if(distance<=reach&&verticalDistance<=verticalReach){
+  const base=type==='hardBody'?13:type==='body'?9:type.toLowerCase().includes('hook')?10:isKick?9:5.8;
+  let damage=base*f.spec.power;if(op.guard>0)damage*=.35;
+  op.hp=Math.max(0,op.hp-damage);op.stun=.22+damage/190;
+  op.vx+=f.face*(isKick?220:160);op.vy-=isKick?118:58;
+  op.flash=.18;op.fall=Math.max(op.fall,type==='hardBody'?.25:.13);
+  burst(op.x,op.y-49,8,f.spec.accent);updateHud();
+  if(type==='hardBody')toast('HARD BODY SHOT!');else if(type==='body')toast('BODY SHOT!');else if(isKick)toast('KICK!');
+ }else if(f.player){toast(verticalDistance>verticalReach?'TOO HIGH / LOW!':'OUT OF RANGE!')}
+}
 function action(key){if(!playing)return;const f=player,now=performance.now();f.lastTap??={};const prev=f.lastTap[key]||0;const twice=now-prev<330;f.lastTap[key]=now;let type;if(key==='x')type=twice?'lowKick':'jab';if(key==='o')type=twice?'highKick':'jab';if(key==='triangle')type=twice?'body':'leftHook';if(key==='square')type=twice?'hardBody':'rightHook';strike(f,type)}
 document.querySelectorAll('[data-action]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');action(b.dataset.action)});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>b.classList.remove('down')))});
 const joyEl=$('joystick'),knob=$('knob');
@@ -66,58 +83,65 @@ f.fall=Math.max(0,f.fall-dt);if(f.fall===0&&f.stun===0){f.y+=(H*.70-f.y)*Math.mi
 function line(x1,y1,x2,y2,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
 
 // Pixel-art fighter renderer: flat side-on silhouettes, chunky outlines and hand-built animation poses.
+// Pixel-art fighter renderer with full torso/hip rotation and planted-foot follow-through.
 function drawStick(f){
- const x=f.x,y=f.y,face=f.face,walk=Math.min(1,Math.hypot(f.vx,f.vy)/150),phase=elapsed*10+(f.player?0:1.4);
- const attacking=f.attack>0,progress=attacking?1-f.attack/.25:0,punch=attacking?Math.sin(Math.min(1,progress)*Math.PI):0;
+ const x=Math.round(f.x),y=Math.round(f.y),face=f.face,walk=Math.min(1,Math.hypot(f.vx,f.vy)/150),phase=elapsed*10+(f.player?0:1.4);
+ const attacking=f.attack>0,p=f.attack>0?Math.sin(Math.min(1,1-f.attack/.34)*Math.PI):0;
  const hurt=f.stun>0,down=f.fall>0,calle=f.index===4;
- const shirt=calle?'#b98a56':f.spec.accent, pants=calle?'#66717b':'#333d45',mask='#eee9dc',outline='#282725';
+ const shirt=calle?'#b98a56':f.spec.accent,pants=calle?'#66717b':'#333d45',mask='#eee9dc',outline='#282725';
  const bob=Math.round(Math.sin(phase)*2*(1-walk)),step=Math.round(Math.sin(phase)*4*walk);
- ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(face,1);
- // Ground shadow and squash/lean for hit reactions.
- ctx.fillStyle='#161b17a8';ctx.fillRect(-19,2,40,5);
- if(down)ctx.rotate(.72);
- const px=(a,b,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(a),Math.round(b),w,h)};
- // Shoes, legs and jeans: separate frames for idle, run, crouch and kicks.
- let legA=step,legB=-step;
- if(attacking&&f.attackType.toLowerCase().includes('kick')){legA=20+Math.round(24*punch);legB=-8}
- if(down){legA=12;legB=-8}
- px(-13+legA,-20+bob,10,17,pants);px(-14+legA,-7+bob,12,8,pants);
- px(3+legB,-20+bob,10,17,pants);px(2+legB,-7+bob,12,8,pants);
- px(-18+legA,-1+bob,18,5,'#d9d8d0');px(-2+legB,-1+bob,18,5,'#d9d8d0');
- px(-15+legA,-17+bob,13,3,'#87919a');px(2+legB,-17+bob,12,3,'#87919a');
- // Torso and belt.
- px(-13,-54+bob,27,29,outline);px(-11,-53+bob,23,27,shirt);
- px(-13,-29+bob,27,5,outline);px(-11,-28+bob,23,3,calle?'#e7e3d7':'#d4d0c4');
- px(-2,-29+bob,6,4,'#d6cba8');px(0,-28+bob,2,2,'#544c3d');
- // Arms are animated independently for jab, hook, body shot, guard and recovery.
- let backEl=[-17,-43],backHand=[-20,-32],frontEl=[17,-44],frontHand=[20,-32];
+ let twist=0,lean=0,hipTurn=0,shoulderTurn=0;
+ const kick=attacking&&f.attackType.toLowerCase().includes('kick');
  if(attacking){
   const t=f.attackType;
-  if(t==='jab'){frontEl=[24+Math.round(10*punch),-49];frontHand=[43+Math.round(20*punch),-49]}
-  else if(t==='leftHook'){backEl=[-2,-62];backHand=[20+Math.round(20*punch),-52];frontEl=[17,-43];frontHand=[23,-32]}
-  else if(t==='rightHook'){frontEl=[25,-61];frontHand=[39+Math.round(12*punch),-49]}
-  else if(t==='body'||t==='hardBody'){frontEl=[22,-42];frontHand=[42+Math.round(15*punch),-34];backEl=[-5,-48];backHand=[10,-38]}
-  else if(t==='lowKick'||t==='highKick'){frontEl=[20,-49];frontHand=[27,-40];backEl=[-18,-48];backHand=[-25,-39]}
+  if(t==='jab'){twist=-.18*p;lean=.12*p;shoulderTurn=-.30*p}
+  else if(t.toLowerCase().includes('hook')){twist=-.40*p;lean=.18*p;shoulderTurn=-.60*p}
+  else if(t==='body'||t==='hardBody'){twist=-.34*p;lean=.28*p;shoulderTurn=-.48*p}
+  else if(kick){twist=.28*p;lean=-.24*p;hipTurn=.48*p;shoulderTurn=-.32*p}
  }
- if(hurt){backEl=[-23,-46];backHand=[-28,-36];frontEl=[23,-46];frontHand=[29,-36]}
- if(!attacking&&!hurt){backEl=[-18,-44+Math.round(step*.35)];backHand=[-20,-31+Math.round(step*.3)];frontEl=[18,-44-Math.round(step*.35)];frontHand=[21,-31-Math.round(step*.3)]}
- const limb=(sx,sy,ex,ey,c)=>{px(sx-3,sy,7,Math.max(4,ey-sy),outline);px(sx-2,sy,5,Math.max(4,ey-sy),c);px(ex-3,ey-2,8,7,outline);px(ex-2,ey-1,6,5,mask)};
- limb(-9,-51,backEl[0],backEl[1],shirt);limb(9,-51,frontEl[0],frontEl[1],shirt);
- px(backHand[0]-4,backHand[1]-3,9,8,outline);px(backHand[0]-2,backHand[1]-2,6,5,mask);
- px(frontHand[0]-4,frontHand[1]-3,9,8,outline);px(frontHand[0]-2,frontHand[1]-2,6,5,mask);
- // Neck, head wrap, white face covering and scarf reproduce the supplied Callejero design.
- px(-7,-67+bob,15,15,outline);px(-5,-66+bob,11,12,calle?'#b58a62':'#b98d6a');
- px(-9,-78+bob,19,17,outline);px(-7,-77+bob,15,14,calle?mask:f.spec.color);
- px(-8,-73+bob,17,7,mask);px(-7,-67+bob,15,7,mask);px(-5,-63+bob,11,5,mask);
- px(-8,-76+bob,18,3,calle?'#fffdf2':f.spec.color);px(-10,-72+bob,3,7,outline);px(8,-72+bob,3,7,outline);
- // Scarf drapes over the chest, especially visible on Callejero.
- px(-8,-60+bob,17,8,mask);px(-6,-54+bob,13,7,mask);px(-4,-48+bob,9,5,mask);
- if(calle){px(-12,-28+bob,5,3,'#f3f0e7');px(8,-28+bob,5,3,'#f3f0e7')}
- // Motion trails and impact accents are pixel blocks rather than smooth 3D arcs.
- if(attacking&&punch>.08){ctx.globalAlpha=.75;const hx=frontHand[0]+8;px(hx,-52,3,3,'#fff1c8');px(hx+6,-56,3,3,'#fff1c8');px(hx+10,-48,3,3,'#fff1c8');ctx.globalAlpha=1}
- if(hurt){px(-18,-87,4,4,'#fff4b8');px(16,-84,4,4,'#fff4b8')}
+ if(hurt){twist=.16;lean=-.12}
+ if(down){lean=.45}
+ ctx.save();ctx.translate(x,y);ctx.scale(face,1);
+ ctx.fillStyle='#161b17a8';ctx.fillRect(-20,2,42,5);
+ // Rear leg remains planted; kicking leg pivots from the hip.
+ const footPlant=down?10:0;
+ const px=(a,b,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(a),Math.round(b),w,h)};
+ px(-14+step,-20+bob,11,17,pants);px(-15+step,-7+bob,13,8,pants);
+ px(-18+step,-1+bob,19,5,'#d9d8d0');px(-15+step,-17+bob,13,3,'#87919a');
+ ctx.save();ctx.translate(8,-20+bob);ctx.rotate(hipTurn+(kick?.75*p:0));
+ px(-2,0,12,17,pants);px(-3,13,13,8,pants);px(-5,21,19,5,'#d9d8d0');px(-2,3,12,3,'#87919a');ctx.restore();
+ // Hip and waist turn independently so punches visibly rotate through the hips.
+ ctx.save();ctx.translate(0,-28+bob);ctx.rotate(twist+hipTurn*.35);
+ px(-14,-3,28,7,outline);px(-12,-2,24,4,calle?'#e7e3d7':'#d4d0c4');px(-2,-2,6,4,'#d6cba8');
+ ctx.save();ctx.rotate(lean+twist*.35);
+ px(-13,-29,27,29,outline);px(-11,-28,23,27,shirt);
+ px(-8,-24,4,3,calle?'#d0a071':'#fff');px(4,-17,4,3,calle?'#d0a071':'#fff');
+ // Arm wind-up, acceleration, contact and recoil are separate pose phases.
+ let rearEl=[-17,-18],rearHand=[-20,-4],frontEl=[17,-19],frontHand=[20,-5];
+ if(attacking){
+  const t=f.attackType;
+  if(t==='jab'){frontEl=[23+12*p,-25];frontHand=[44+22*p,-26];rearHand=[-17,-6]}
+  else if(t==='leftHook'){rearEl=[-7,-33];rearHand=[19+23*p,-23];frontHand=[22,-5]}
+  else if(t==='rightHook'){frontEl=[25,-34];frontHand=[40+16*p,-23]}
+  else if(t==='body'||t==='hardBody'){frontEl=[22,-16];frontHand=[40+20*p,-2];rearEl=[-8,-23];rearHand=[13,-10]}
+  else if(kick){frontEl=[24,-24];frontHand=[29,-13];rearHand=[-23,-6]}
+ }
+ if(hurt){rearEl=[-23,-17];rearHand=[-28,-5];frontEl=[23,-18];frontHand=[29,-4]}
+ const arm=(sx,sy,el,hand)=>{px(sx-3,sy,7,Math.max(5,el[1]-sy+5),outline);px(sx-2,sy,5,Math.max(5,el[1]-sy+4),shirt);px(el[0]-3,el[1]-2,8,7,outline);px(el[0]-2,el[1]-1,6,5,shirt);px(hand[0]-4,hand[1]-3,9,8,outline);px(hand[0]-2,hand[1]-2,6,5,mask)};
+ arm(-9,-26,rearEl,rearHand);arm(9,-26,frontEl,frontHand);
+ // Shoulder/chest twist rotates around the waist rather than sliding the arm only.
  ctx.restore();
- ctx.textAlign='center';ctx.font='bold 10px monospace';ctx.fillStyle='#fff';ctx.fillText(f.spec.name,Math.round(x),Math.round(y-94));
+ ctx.restore();
+ // Head follows the shoulder rotation slightly, with the scarf trailing the torso.
+ ctx.save();ctx.translate(0,-60+bob);ctx.rotate(twist*.28+lean*.15);
+ px(-8,-8,16,15,outline);px(-6,-7,12,12,calle?mask:f.spec.color);
+ px(-8,-3,17,7,mask);px(-7,4,15,7,mask);px(-5,10,11,4,mask);
+ px(-8,-7,18,3,calle?'#fffdf2':f.spec.color);px(-10,-3,3,7,outline);px(8,-3,3,7,outline);
+ px(-8,13,17,7,mask);px(-6,19,13,6,mask);ctx.restore();
+ // Pixel trails show the direction and follow-through of each strike.
+ if(attacking&&p>.15){ctx.globalAlpha=.8;const hx=kick?38+Math.round(22*p):42+Math.round(20*p);px(hx,-55,4,4,'#fff1c8');px(hx+7,-60,3,3,'#fff1c8');px(hx+12,-50,3,3,'#fff1c8');ctx.globalAlpha=1}
+ if(hurt){px(-18,-90,4,4,'#fff4b8');px(16,-86,4,4,'#fff4b8')}
+ ctx.restore();ctx.textAlign='center';ctx.font='bold 10px monospace';ctx.fillStyle='#fff';ctx.fillText(f.spec.name,x,y-96);
 }
 function spectator(x,y,scale,variant,cheering=false){
  const shirts=['#b8c9d2','#d5b38b','#a8b89a','#c5a5a5','#d2d0bd','#8298b4'];ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(scale,scale);
