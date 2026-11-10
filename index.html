@@ -59,6 +59,10 @@
 #select{z-index:40}
 #modeMenu{z-index:40}
 #start.title-start{display:block;position:relative;z-index:50;min-height:56px;min-width:190px;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
+
+/* Hidden screens must remain hidden even when they also use the flex title-screen style. */
+.select.hidden{display:none!important}
+#modeMenu .menu-grid,#modeMenu .menu-option,#modeMenu #modeBack{position:relative;z-index:60;pointer-events:auto;touch-action:manipulation}
 </style></head>
 <body><div id="game"><canvas id="scene"></canvas><div id="hud" class="hidden">
 <div class="top"><div class="panel"><div class="name" id="pname">PLAYER</div><span class="number" id="phealth">100</span><div class="health"><span id="pbar"></span></div></div><div class="center">WORKED<div class="sub" id="round">BACKYARD BRAWL • ROUND 1</div></div><div class="panel right"><div class="name" id="ename">OPPONENT</div><span class="number" id="ehealth">100</span><div class="health"><span id="ebar"></span></div></div></div>
